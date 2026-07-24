@@ -6,7 +6,7 @@ import { ImageResponse } from "next/og";
  * покладіть файл public/og.png і додайте його в metadata.openGraph.images.
  */
 export const alt =
-  "Sense House — електрика та розумний будинок під ключ у Кропивницькому";
+  "Sense House — електрика та розумний дім під ключ у Кропивницькому";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -83,7 +83,7 @@ export default function OpengraphImage() {
             Будинок, у якому все працює як одне ціле.
           </div>
           <div style={{ fontSize: 26, color: "#9fb0c8" }}>
-            Електрика та розумний будинок під ключ · Кропивницький
+            Електрика та розумний дім під ключ · Кропивницький
           </div>
           <div style={{ fontSize: 24, color: "#21b4ff", display: "flex" }}>
             +380 73 198 49 18 · sense-house.com

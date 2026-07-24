@@ -12,7 +12,7 @@ export default function Footer() {
           <div>
             <Logo idPrefix="sh-ftr" />
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-silver-dim">
-              Електрика та розумний будинок під ключ: проєктування, монтаж,
+              Електрика та розумний дім під ключ: проєктування, монтаж,
               інтеграція та підтримка інженерних систем як однієї цілісної
               системи.
             </p>

@@ -9,7 +9,7 @@
 
 export const site = {
   name: "Sense House",
-  tagline: "Електрика та розумний будинок під ключ",
+  tagline: "Електрика та розумний дім під ключ",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://sense-house.com",
 
   phone: {
