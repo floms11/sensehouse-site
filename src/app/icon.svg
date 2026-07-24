@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 901 901">
+  <!-- Favicon Sense House: фірмовий знак на Deep Navy, потовщені лінії для малих розмірів -->
+  <rect width="901" height="901" rx="180" fill="#081a3a"/>
+  <path d="M 200 486 L 200 408 L 158 408 L 158 386 L 452 180 L 555 257 L 555 208 L 631 208 L 631 312 L 744 387 L 744 408 L 707 408 L 707 486 M 707 535 L 707 718 L 477 718 M 427 718 L 200 718 L 200 535"
+        fill="none" stroke="#D6E5EC" stroke-width="40" stroke-linecap="square" stroke-linejoin="miter"/>
+  <g fill="none" stroke="#2AA9D6" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 144 511 L 301 511 L 338 546 L 365 546 L 452 480 L 533 426 L 634 511 L 759 511"/>
+    <path d="M 452 480 L 452 259"/>
+    <path d="M 452 590 L 452 724"/>
+  </g>
+  <g fill="#42C8E9">
+    <circle cx="144" cy="511" r="42"/>
+    <circle cx="452" cy="259" r="42"/>
+    <circle cx="452" cy="590" r="46"/>
+  </g>
+  <g fill="#FFC452">
+    <circle cx="759" cy="511" r="42"/>
+    <circle cx="533" cy="426" r="42"/>
+  </g>
+</svg>
