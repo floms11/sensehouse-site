@@ -3,8 +3,6 @@
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-const pendingTargetKey = "sense-house-scroll-target";
-
 function targetIdFromHash(hash: string): string {
   try {
     return decodeURIComponent(hash.replace(/^#/, ""));
@@ -63,12 +61,24 @@ export default function CleanAnchorNavigation() {
   const router = useRouter();
 
   useEffect(() => {
-    const pendingTarget = window.sessionStorage.getItem(pendingTargetKey);
-    const targetId =
-      pendingTarget ?? targetIdFromHash(window.location.hash);
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
+
+    if (!window.location.hash) {
+      window.requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: "auto" });
+      });
+    }
+
+    return () => {
+      window.history.scrollRestoration = previousScrollRestoration;
+    };
+  }, []);
+
+  useEffect(() => {
+    const targetId = targetIdFromHash(window.location.hash);
     if (!targetId) return;
 
-    window.sessionStorage.removeItem(pendingTargetKey);
     const frame = window.requestAnimationFrame(() => {
       if (scrollToTarget(targetId)) cleanCurrentUrl();
     });
@@ -131,8 +141,7 @@ export default function CleanAnchorNavigation() {
       }
 
       event.preventDefault();
-      window.sessionStorage.setItem(pendingTargetKey, targetId);
-      router.push(`${url.pathname}${url.search}`);
+      router.push(`${url.pathname}${url.search}${url.hash}`);
     };
 
     document.addEventListener("click", onClick, true);
