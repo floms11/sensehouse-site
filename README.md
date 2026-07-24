@@ -55,10 +55,11 @@ Meta Pixel підключаються тільки за наявності ре�
 
 ## SEO
 
-Title, description, canonical, Open Graph і `LocalBusiness` JSON-LD
-налаштовані в `src/app/layout.tsx`. Домен береться з
-`NEXT_PUBLIC_SITE_URL` і за замовчуванням дорівнює
-`https://sense-house.com`.
+Title, description, canonical і Open Graph налаштовані в
+`src/app/layout.tsx`. `WebSite`, `Organization` і `Service` JSON-LD
+додаються лише на головній сторінці. Канонічний домен зафіксований у
+`src/config/site.ts`, щоб preview- або origin-адреса не потрапила до
+canonical, sitemap чи соціальних превʼю.
 
 ## Контент і матеріали
 
@@ -76,5 +77,7 @@ Title, description, canonical, Open Graph і `LocalBusiness` JSON-LD
 - перевірити роботу реального каналу заявки;
 - перевірити телефон, Telegram, Instagram і всі CTA;
 - виконати `npm run lint` та `npm run build`;
+- на запущеній production-збірці виконати
+  `npm run seo:check -- http://127.0.0.1:3000`;
 - переглянути 375, 768, 1024 і 1440px, клавіатурну навігацію та reduced
   motion.

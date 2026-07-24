@@ -7,6 +7,7 @@ import ProcessTimeline from "@/components/ProcessTimeline";
 import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
 import MobileContactBar from "@/components/MobileContactBar";
+import { homeStructuredData } from "@/lib/structured-data";
 
 export default function Home() {
   return (
@@ -24,6 +25,10 @@ export default function Home() {
 
       <Footer />
       <MobileContactBar />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeStructuredData) }}
+      />
     </>
   );
 }

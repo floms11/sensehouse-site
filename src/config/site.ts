@@ -7,10 +7,18 @@
  * «Відсутні матеріали»).
  */
 
+/**
+ * Канонічний домен навмисно не залежить від env.
+ *
+ * Публічні SEO-URL не повинні змінюватися на адресу origin-сервера,
+ * preview-домен або внутрішній IP через конфігурацію хостингу.
+ */
+const canonicalUrl = "https://sense-house.com";
+
 export const site = {
   name: "Sense House",
   tagline: "Електрика та інженерні системи під ключ",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://sense-house.com",
+  url: canonicalUrl,
 
   phone: {
     /** Формат для tel: посилань */

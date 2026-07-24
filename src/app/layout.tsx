@@ -25,24 +25,14 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 const title =
-  "Електрика та інженерні системи під ключ у Кропивницькому | Sense House";
+  "Електрика під ключ і розумний дім у Кропивницькому | Sense House";
 const description =
-  "Проєктування й реалізація електрики та розумного дому: електрощити, автоматизація, резервне живлення, мережа й безпека для приватних будинків у Кропивницькому та області.";
+  "Проєктуємо та реалізуємо електрику й розумний дім під ключ у Кропивницькому та області: електрощити, світло, клімат, безпека, резерв і мережа.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title,
   description,
-  keywords: [
-    "розумний дім",
-    "розумний будинок",
-    "розумний дім Кропивницький",
-    "розумний будинок Кропивницький",
-    "автоматизація будинку",
-    "електромонтаж Кропивницький",
-    "електрика під ключ",
-    "інженерні системи будинку",
-  ],
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
@@ -57,34 +47,17 @@ export const metadata: Metadata = {
     title,
     description,
   },
-  robots: { index: true, follow: true },
-};
-
-/** LocalBusiness structured data — лише підтверджені дані. */
-const structuredData = {
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  name: site.name,
-  description:
-    "Проєктування та реалізація електрики, розумного дому й інженерних систем для приватних будинків: електрощити, автоматизація, безпека, мережа та резервне живлення.",
-  url: site.url,
-  telephone: site.phone.e164,
-  sameAs: [site.social.instagram, site.social.telegram].filter(Boolean),
-  areaServed: [
-    { "@type": "City", name: "Кропивницький" },
-    { "@type": "AdministrativeArea", name: "Кіровоградська область" },
-  ],
-  knowsAbout: [
-    "Електромонтаж",
-    "Проєктування електрики",
-    "Розумний дім",
-    "Розумний будинок",
-    "Автоматизація будинку",
-    "Монтаж електрощитів",
-    "Резервне живлення",
-    "Відеоспостереження",
-    "Локальні мережі",
-  ],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
 };
 
 export default function RootLayout({
@@ -105,11 +78,6 @@ export default function RootLayout({
           Перейти до змісту
         </a>
         {children}
-
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
 
         {/* Аналітика підключається лише за наявності справжніх ID у env */}
         {GA_ID && (

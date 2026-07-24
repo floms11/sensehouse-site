@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     "Як Sense House отримує, використовує та захищає дані, надіслані через сайт.",
   alternates: { canonical: "/privacy" },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: true },
 };
 
 export default function PrivacyPage() {
