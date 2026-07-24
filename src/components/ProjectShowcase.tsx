@@ -1,20 +1,28 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useState } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+} from "react";
 import { trackEvent } from "@/lib/analytics";
 
 /**
- * Переглядач реального технічного проєкту «Власна оселя 001».
- * Дизайн: аркуш проєкту як фізичний обʼєкт (стос сторінок із мʼякою
- * тінню) на світлому фоні секції — без важкого білого контейнера.
- * Категорії — мінімальні текстові таби, навігація — тонкий тулбар.
+ * Переглядач фрагментів робочої технічної документації.
+ * Альбомні аркуші показуються повністю, вертикальні — збільшеним
+ * фрагментом із можливістю відкрити повну сторінку. Розмір viewport
+ * не змінюється між форматами.
  */
 
 type Page = {
   src: string;
   title: string;
   note: string;
+  portrait?: boolean;
 };
 
 type Group = {
@@ -25,28 +33,47 @@ type Group = {
 
 const groups: Group[] = [
   {
+    id: "logic",
+    label: "Логіка",
+    pages: [
+      {
+        src: "/project/concept-system.webp",
+        title: "Функціональна концепція будинку",
+        note: "Світло, клімат, безпека, доступ і резервне живлення зведені в одну логіку.",
+      },
+      {
+        src: "/project/concept-scenarios.webp",
+        title: "Основні сценарії",
+        note: "Зрозумілі режими для відсутності, повернення, ночі, ранку та щоденних звичок.",
+      },
+      {
+        src: "/project/calculation-phases.webp",
+        title: "Баланс фаз",
+        note: "Навантаження розподілене між фазами й перевірене до комплектації щита.",
+      },
+    ],
+  },
+  {
     id: "plans",
     label: "Плани",
     pages: [
       {
-        src: "/project/pasport.webp",
-        title: "Паспорт обʼєкта",
-        note: "Потужність, струм вводу та структура навантаження — розраховано, а не припущено.",
-      },
-      {
-        src: "/project/plan-rozetky.webp",
+        src: "/project/plan-sockets-new.webp",
         title: "План розеток і вимикачів",
-        note: "Кожна точка з розмірними привʼязками — монтаж без здогадок.",
+        note: "Кожна точка має розмірну привʼязку до стін, меблів і проходів.",
+        portrait: true,
       },
       {
-        src: "/project/plan-osvitlennia.webp",
+        src: "/project/plan-lighting-new.webp",
         title: "План освітлення",
-        note: "Групи світла, керування й розміщення світильників по приміщеннях.",
+        note: "Світильники, групи керування й монтажні привʼязки по приміщеннях.",
+        portrait: true,
       },
       {
-        src: "/project/kabelni-trasy.webp",
-        title: "Кабельні траси будинку",
-        note: "Усі лінії будинку на одному кресленні: силові, слаботочні, автоматика.",
+        src: "/project/plan-cables-new.webp",
+        title: "Кабельні лінії будинку",
+        note: "Траси силових, слаботочних та автоматизаційних ліній на плані.",
+        portrait: true,
       },
     ],
   },
@@ -55,14 +82,19 @@ const groups: Group[] = [
     label: "Розгортки",
     pages: [
       {
-        src: "/project/rozgortka-rozmishchennia.webp",
-        title: "Стіна — розміщення",
-        note: "Розетки, вимикачі й обладнання на стіні з точними розмірами.",
+        src: "/project/wall-placement-new.webp",
+        title: "Розміщення обладнання",
+        note: "Привʼязки розеток, вимикачів та обладнання до готових поверхонь.",
       },
       {
-        src: "/project/rozgortka-kabel.webp",
-        title: "Стіна — кабельні лінії",
-        note: "Кожна лінія в стіні підписана кодом і маркою кабелю.",
+        src: "/project/wall-routes-new.webp",
+        title: "Маршрути кабельних трас",
+        note: "Окремо показано, де проходять штроби та як кабелі підходять до точок.",
+      },
+      {
+        src: "/project/wall-cables-new.webp",
+        title: "Маркування кабельних ліній",
+        note: "Кожна траса підписана кодом і маркою кабелю — від щита до споживача.",
       },
     ],
   },
@@ -71,30 +103,54 @@ const groups: Group[] = [
     label: "Щити",
     pages: [
       {
-        src: "/project/shchyt-zakrytyi.webp",
-        title: "Щит із наліпками",
-        note: "Кожен автомат підписаний — зрозуміло без електрика.",
+        src: "/project/board-closed-new.webp",
+        title: "Компонування електрощита",
+        note: "Розкладка пристроїв і зрозуміле маркування кожної групи.",
+        portrait: true,
       },
       {
-        src: "/project/shchyt-shema.webp",
-        title: "Принципова схема",
-        note: "Повна схема зʼєднань: 44 пристрої, кожна клема простежується.",
+        src: "/project/board-schematic-new.webp",
+        title: "Принципова схема щита",
+        note: "Зʼєднання, захисти, клеми й підключення показані до початку збірки.",
+        portrait: true,
+      },
+      {
+        src: "/project/document-board-spec.webp",
+        title: "Специфікація електрощита",
+        note: "Позиція, тип пристрою, виробник, модель і місце на DIN-рейці.",
       },
     ],
   },
   {
-    id: "journal",
-    label: "Журнал",
+    id: "documents",
+    label: "Документи",
     pages: [
       {
-        src: "/project/kabelnyi-zhurnal.webp",
-        title: "Кабельний журнал",
-        note: "Код, призначення, марка, довжина, гофра — по кожній лінії.",
+        src: "/project/calculation-passport.webp",
+        title: "Паспорт і структура навантажень",
+        note: "Вхідні параметри, розрахункова потужність і розподіл споживання по системах.",
       },
       {
-        src: "/project/rozpinovka.webp",
-        title: "Розпіновка ліній",
-        note: "Пожильно: колір жили, функція, клема підключення.",
+        src: "/project/document-cable-journal.webp",
+        title: "Кабельний журнал приміщення",
+        note: "Коди, призначення, довжини й типи гофри зведені в одну таблицю.",
+      },
+      {
+        src: "/project/document-work-scope.webp",
+        title: "Орієнтовний перелік робіт",
+        note: "Обсяги робіт формуються з проєкту до початку монтажу.",
+      },
+      {
+        src: "/project/document-pinout.webp",
+        title: "Розпіновка кабельних ліній",
+        note: "Колір жили, функція та клема підключення зафіксовані для кожної лінії.",
+        portrait: true,
+      },
+      {
+        src: "/project/document-room-cabling.webp",
+        title: "Прокладання кабелю по приміщеннях",
+        note: "Обсяги трас, гофри й штроблення зведені по кожному приміщенню.",
+        portrait: true,
       },
     ],
   },
@@ -103,15 +159,31 @@ const groups: Group[] = [
 export default function ProjectShowcase() {
   const [groupIdx, setGroupIdx] = useState(0);
   const [pageIdx, setPageIdx] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const baseId = useId();
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const lightboxTriggerRef = useRef<HTMLButtonElement>(null);
 
   const group = groups[groupIdx];
   const page = group.pages[pageIdx];
 
-  const selectGroup = (i: number) => {
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    if (lightboxOpen && !dialog.open) {
+      dialog.showModal();
+    } else if (!lightboxOpen && dialog.open) {
+      dialog.close();
+    }
+  }, [lightboxOpen]);
+
+  const selectGroup = (i: number, moveFocus = false) => {
     setGroupIdx(i);
     setPageIdx(0);
     trackEvent("project_page_change", { group: groups[i].id, page: 0 });
+    if (moveFocus) tabRefs.current[i]?.focus();
   };
 
   const selectPage = (i: number) => {
@@ -119,27 +191,75 @@ export default function ProjectShowcase() {
     trackEvent("project_page_change", { group: group.id, page: i });
   };
 
+  const openLightbox = (event: MouseEvent<HTMLButtonElement>) => {
+    lightboxTriggerRef.current = event.currentTarget;
+    setLightboxOpen(true);
+    trackEvent("project_sheet_open", {
+      group: group.id,
+      page: pageIdx,
+    });
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+  };
+
+  const onTabKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    let nextIndex = groupIdx;
+
+    if (event.key === "ArrowRight") {
+      nextIndex = (groupIdx + 1) % groups.length;
+    } else if (event.key === "ArrowLeft") {
+      nextIndex = (groupIdx - 1 + groups.length) % groups.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = groups.length - 1;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    selectGroup(nextIndex, true);
+  };
+
+  const onDialogKeyDown = (event: KeyboardEvent<HTMLDialogElement>) => {
+    if (group.pages.length < 2) return;
+
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      selectPage((pageIdx + 1) % group.pages.length);
+    } else if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      selectPage((pageIdx - 1 + group.pages.length) % group.pages.length);
+    }
+  };
+
   return (
-    <div>
-      {/* Категорії — мінімальні текстові таби */}
+    <div data-testid="project-showcase">
+      {/* Категорії — без вкладеного скролу та системного scrollbar */}
       <div
         role="tablist"
         aria-label="Розділи технічного проєкту"
-        className="flex gap-6 overflow-x-auto border-b border-navy/10 sm:gap-8"
+        onKeyDown={onTabKeyDown}
+        className="grid grid-cols-5 border-b border-navy/10"
       >
         {groups.map((g, i) => (
           <button
             key={g.id}
+            ref={(element) => {
+              tabRefs.current[i] = element;
+            }}
             role="tab"
             id={`${baseId}-tab-${g.id}`}
             aria-selected={i === groupIdx}
             aria-controls={`${baseId}-panel`}
             tabIndex={i === groupIdx ? 0 : -1}
             onClick={() => selectGroup(i)}
-            className={`-mb-px shrink-0 border-b-2 pt-1 pb-3 text-[0.8rem] font-semibold tracking-[0.14em] uppercase transition-colors duration-300 ${
+            className={`-mb-px flex min-h-11 min-w-0 cursor-pointer items-center justify-center border-b-2 px-0.5 pt-1 text-center text-[0.56rem] font-semibold tracking-[0.035em] uppercase transition-[color,border-color,background-color] duration-200 xs:text-[0.61rem] sm:px-1 sm:text-[0.7rem] sm:tracking-[0.08em] ${
               i === groupIdx
                 ? "border-blue text-navy"
-                : "border-transparent text-navy/45 hover:text-navy/75"
+                : "border-transparent text-navy/45 hover:bg-white/20 hover:text-navy/75"
             }`}
           >
             {g.label}
@@ -154,7 +274,7 @@ export default function ProjectShowcase() {
         aria-labelledby={`${baseId}-tab-${group.id}`}
         className="mt-8"
       >
-        <div className="relative">
+        <div className="relative isolate">
           {/* Стос сторінок позаду */}
           <div
             aria-hidden="true"
@@ -165,41 +285,68 @@ export default function ProjectShowcase() {
             className="absolute inset-0 translate-x-1 translate-y-1 rotate-[-0.5deg] rounded-lg bg-white/90 ring-1 ring-navy/5"
           />
 
-          {/* Активний аркуш */}
-          <div className="relative overflow-hidden rounded-lg bg-white ring-1 ring-navy/10 shadow-[0_32px_64px_-32px_rgb(8_26_58/0.35)]">
-            <Image
-              key={page.src}
-              src={page.src}
-              alt={`Сторінка проєкту: ${page.title}`}
-              width={1754}
-              height={1241}
-              sizes="(min-width: 1024px) 620px, 100vw"
-              className="h-auto w-full animate-[intro-in_0.5s_var(--ease-smooth)_both]"
-              loading="lazy"
-            />
-          </div>
+          {/* Стабільний viewport для альбомних і вертикальних аркушів */}
+          <button
+            type="button"
+            onClick={openLightbox}
+            aria-label={`Збільшити сторінку «${page.title}»`}
+            data-testid="project-sheet-preview"
+            className="relative block aspect-[2000/1305] w-full cursor-pointer overflow-hidden rounded-lg bg-white text-left ring-1 ring-navy/10 shadow-[0_32px_64px_-32px_rgb(8_26_58/0.35)]"
+          >
+            {group.pages.map((item, i) => (
+              <Image
+                key={item.src}
+                src={item.src}
+                alt={i === pageIdx ? `Сторінка проєкту: ${item.title}` : ""}
+                aria-hidden={i !== pageIdx}
+                width={item.portrait ? 1320 : 1800}
+                height={item.portrait ? 1800 : 1175}
+                sizes="(min-width: 1024px) 620px, (min-width: 640px) 80vw, calc(100vw - 40px)"
+                style={item.portrait ? { objectPosition: "50% top" } : undefined}
+                className={`absolute inset-0 h-full w-full select-none transition-opacity duration-200 ease-out motion-reduce:transition-none ${
+                  item.portrait ? "object-cover" : "object-contain"
+                } ${
+                  i === pageIdx ? "opacity-100" : "pointer-events-none opacity-0"
+                }`}
+                loading="lazy"
+              />
+            ))}
+            {page.portrait && (
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute right-3 bottom-3 z-10 rounded-full bg-navy/85 px-3 py-1.5 text-[0.62rem] font-semibold tracking-[0.06em] text-white uppercase shadow-sm"
+              >
+                Фрагмент аркуша
+              </span>
+            )}
+          </button>
         </div>
 
-        {/* Тонкий тулбар */}
-        <div className="mt-5 flex items-center justify-between gap-4">
-          <div aria-live="polite" className="min-w-0">
-            <p className="truncate text-[0.95rem] font-semibold text-navy">
+        {/* Підпис і керування мають окремі стабільні зони */}
+        <div className="mt-5 grid gap-4 xs:grid-cols-[minmax(0,1fr)_auto] xs:items-start">
+          <div aria-live="polite" aria-atomic="true" className="min-w-0 xs:min-h-[4.5rem]">
+            <p className="text-[0.95rem] leading-snug font-semibold text-navy">
               {page.title}
             </p>
-            <p className="mt-0.5 truncate text-sm text-navy/55">{page.note}</p>
+            <p className="mt-1 text-sm leading-relaxed text-navy/55">
+              {page.note}
+            </p>
           </div>
 
-          <div className="flex shrink-0 items-center gap-1.5">
+          <div className="flex min-h-11 shrink-0 items-center gap-2 xs:justify-end">
             {group.pages.length > 1 && (
               <>
-                <span className="font-display mr-1.5 text-sm tabular-nums text-navy/45">
+                <span
+                  aria-label={`Сторінка ${pageIdx + 1} з ${group.pages.length}`}
+                  className="font-display mr-1 min-w-[2.75rem] text-center text-sm tabular-nums text-navy/45"
+                >
                   {pageIdx + 1}/{group.pages.length}
                 </span>
                 <button
                   type="button"
                   onClick={() => selectPage((pageIdx - 1 + group.pages.length) % group.pages.length)}
                   aria-label="Попередня сторінка"
-                  className="flex size-10 items-center justify-center rounded-full border border-navy/15 text-navy/70 transition-colors hover:border-navy/35 hover:text-navy"
+                  className="flex size-11 cursor-pointer items-center justify-center rounded-full border border-navy/15 text-navy/70 transition-[color,border-color,background-color] duration-200 hover:border-navy/35 hover:bg-white/35 hover:text-navy active:bg-white/60 focus-visible:rounded-full"
                 >
                   <svg viewBox="0 0 24 24" className="size-4" fill="none" aria-hidden="true">
                     <path d="m14 6-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -209,7 +356,7 @@ export default function ProjectShowcase() {
                   type="button"
                   onClick={() => selectPage((pageIdx + 1) % group.pages.length)}
                   aria-label="Наступна сторінка"
-                  className="flex size-10 items-center justify-center rounded-full border border-navy/15 text-navy/70 transition-colors hover:border-navy/35 hover:text-navy"
+                  className="flex size-11 cursor-pointer items-center justify-center rounded-full border border-navy/15 text-navy/70 transition-[color,border-color,background-color] duration-200 hover:border-navy/35 hover:bg-white/35 hover:text-navy active:bg-white/60 focus-visible:rounded-full"
                 >
                   <svg viewBox="0 0 24 24" className="size-4" fill="none" aria-hidden="true">
                     <path d="m10 6 6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -217,20 +364,107 @@ export default function ProjectShowcase() {
                 </button>
               </>
             )}
-            <a
-              href={page.src}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={openLightbox}
               aria-label={`Відкрити сторінку «${page.title}» повністю`}
-              className="ml-1 flex size-10 items-center justify-center rounded-full border border-navy/15 text-navy/70 transition-colors hover:border-blue/60 hover:text-blue"
+              className="flex size-11 cursor-pointer items-center justify-center rounded-full border border-navy/15 text-navy/70 transition-[color,border-color,background-color] duration-200 hover:border-blue/60 hover:bg-white/35 hover:text-blue active:bg-white/60 focus-visible:rounded-full"
             >
               <svg viewBox="0 0 20 20" className="size-4" fill="none" aria-hidden="true">
                 <path d="M8 4h8v8M16 4 8.5 11.5M11 16H4V9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </a>
+            </button>
           </div>
         </div>
       </div>
+
+      <dialog
+        ref={dialogRef}
+        aria-labelledby={`${baseId}-lightbox-title`}
+        onCancel={(event) => {
+          event.preventDefault();
+          closeLightbox();
+        }}
+        onClose={() => {
+          setLightboxOpen(false);
+          lightboxTriggerRef.current?.focus();
+        }}
+        onKeyDown={onDialogKeyDown}
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget) closeLightbox();
+        }}
+        className="m-0 h-dvh max-h-none w-full max-w-none bg-transparent p-3 text-navy backdrop:bg-navy-deep/85 backdrop:backdrop-blur-sm open:flex open:items-center open:justify-center sm:p-6"
+      >
+        <div className="flex max-h-full w-full max-w-7xl flex-col overflow-hidden rounded-xl bg-silver shadow-[0_32px_96px_-24px_rgb(0_0_0/0.75)] ring-1 ring-white/25">
+          <div className="flex min-h-16 items-center gap-4 border-b border-navy/10 px-4 py-3 sm:px-6">
+            <div className="min-w-0 flex-1">
+              <h3
+                id={`${baseId}-lightbox-title`}
+                className="truncate text-base font-bold tracking-tight text-navy sm:text-lg"
+              >
+                {page.title}
+              </h3>
+              <p className="mt-0.5 text-xs text-navy/50">
+                Аркуш {pageIdx + 1} з {group.pages.length} · {group.label}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={closeLightbox}
+              aria-label="Закрити перегляд аркуша"
+              className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-navy/15 text-navy/70 transition-colors duration-200 hover:border-navy/35 hover:bg-white/50 hover:text-navy"
+            >
+              <svg viewBox="0 0 24 24" className="size-5" fill="none" aria-hidden="true">
+                <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="relative h-[min(72dvh,54rem)] min-h-0 bg-white">
+            <Image
+              src={page.src}
+              alt={`Повний аркуш: ${page.title}`}
+              fill
+              sizes="calc(100vw - 48px)"
+              className="object-contain object-top"
+            />
+
+            {group.pages.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => selectPage((pageIdx - 1 + group.pages.length) % group.pages.length)}
+                  aria-label="Попередній аркуш"
+                  className="absolute top-1/2 left-2 flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-navy/85 text-white shadow-lg transition-colors duration-200 hover:bg-navy sm:left-4"
+                >
+                  <svg viewBox="0 0 24 24" className="size-5" fill="none" aria-hidden="true">
+                    <path d="m14 6-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => selectPage((pageIdx + 1) % group.pages.length)}
+                  aria-label="Наступний аркуш"
+                  className="absolute top-1/2 right-2 flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-navy/85 text-white shadow-lg transition-colors duration-200 hover:bg-navy sm:right-4"
+                >
+                  <svg viewBox="0 0 24 24" className="size-5" fill="none" aria-hidden="true">
+                    <path d="m10 6 6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </>
+            )}
+          </div>
+
+          <div className="flex min-h-14 items-center justify-between gap-4 border-t border-navy/10 px-4 py-3 sm:px-6">
+            <p className="line-clamp-2 text-xs leading-relaxed text-navy/60 sm:text-sm">
+              {page.note}
+            </p>
+            <span className="font-display shrink-0 text-sm font-medium tabular-nums text-navy/50">
+              {pageIdx + 1}/{group.pages.length}
+            </span>
+          </div>
+        </div>
+      </dialog>
     </div>
   );
 }

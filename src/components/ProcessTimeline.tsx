@@ -56,7 +56,7 @@ export default function ProcessTimeline() {
     <section
       ref={sectionRef}
       id="process"
-      className="relative scroll-mt-24 py-24 sm:py-32"
+      className="relative py-24 sm:py-32"
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <SectionHeading

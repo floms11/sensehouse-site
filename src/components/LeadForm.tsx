@@ -1,8 +1,16 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import {
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type MouseEvent,
+} from "react";
 import { trackEvent } from "@/lib/analytics";
+import { isValidUkrainianMobilePhone } from "@/lib/contact-validation";
 import { site } from "@/config/site";
+import FormSelect from "./FormSelect";
 
 const objectTypes = ["Приватний будинок", "Квартира", "Бізнес-приміщення", "Інше"];
 
@@ -12,34 +20,198 @@ const stages = [
   "Починається ремонт",
   "Уже триває електромонтаж",
   "Частина робіт уже виконана",
+  "Готовий ремонт",
 ];
 
-const contactMethods = ["Телефон", "Telegram", "Viber", "WhatsApp"];
+const phoneContactMethods = ["Телефон", "Telegram", "WhatsApp"];
+const usernameContactMethods = ["Telegram", "WhatsApp"];
+const emailContactMethods = ["Email"];
 
 type Status = "idle" | "loading" | "success" | "error";
+type ContactMode = "phone" | "username" | "email";
 
-type FieldErrors = Partial<Record<"name" | "phone" | "objectType", string>>;
+type FieldErrors = Partial<Record<"name" | "phone", string>>;
 
-/** Дуже мʼяка перевірка телефону/месенджера: цифри, +, пробіли, дужки, дефіси або @нікнейм */
-function validatePhone(value: string): boolean {
+type ParsedPhone = {
+  digits: string;
+  formatted: string;
+};
+
+/**
+ * Нормалізує українські номери, введені як 67…, 067…, 38067… або +38067….
+ * Явний номер з «+» іншої країни не переписуємо під +380.
+ */
+function parsePhone(value: string): ParsedPhone {
+  const trimmed = value.trimStart();
+  const explicitInternational = trimmed.startsWith("+");
+  const rawDigits = value.replace(/\D/g, "");
+
+  if (!rawDigits) {
+    return {
+      digits: "",
+      formatted: explicitInternational ? "+" : "",
+    };
+  }
+
+  let digits = rawDigits;
+  let pendingPrefix = false;
+
+  if (!explicitInternational) {
+    if (digits.startsWith("380")) {
+      digits = digits.slice(0, 12);
+    } else if (digits.startsWith("38")) {
+      if (digits.length < 3) {
+        pendingPrefix = true;
+      } else if (digits[2] === "0") {
+        digits = digits.slice(0, 12);
+      } else {
+        digits = digits.slice(0, 15);
+      }
+    } else if (digits.startsWith("0")) {
+      if (digits.length === 1) {
+        pendingPrefix = true;
+      } else {
+        digits = `38${digits}`.slice(0, 12);
+      }
+    } else if (digits.length === 1) {
+      pendingPrefix = true;
+    } else {
+      digits = `380${digits}`.slice(0, 12);
+    }
+  } else {
+    digits = digits.slice(0, 15);
+  }
+
+  if (pendingPrefix) return { digits, formatted: digits };
+
+  if (digits.startsWith("380")) {
+    const national = digits.slice(3, 12);
+    const parts = [
+      national.slice(0, 2),
+      national.slice(2, 5),
+      national.slice(5, 7),
+      national.slice(7, 9),
+    ].filter(Boolean);
+    return {
+      digits,
+      formatted: `+380${parts.length ? ` ${parts.join(" ")}` : ""}`,
+    };
+  }
+
+  return { digits, formatted: `+${digits}` };
+}
+
+function caretAfterDigits(value: string, digitCount: number): number {
+  if (digitCount <= 0) return 0;
+
+  let seen = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    if (/\d/.test(value[index])) seen += 1;
+    if (seen === digitCount) return index + 1;
+  }
+  return value.length;
+}
+
+function normalizeUsername(value: string): string {
+  const withoutLink = value
+    .trim()
+    .replace(/^https?:\/\/(?:www\.)?t\.me\//i, "")
+    .replace(/^t\.me\//i, "")
+    .replace(/^@+/, "")
+    .replace(/\s+/g, "");
+  return withoutLink ? `@${withoutLink.slice(0, 64)}` : "";
+}
+
+function validateContact(value: string, mode: ContactMode): boolean {
   const trimmed = value.trim();
-  if (/^@[\w.]{3,}$/.test(trimmed)) return true;
-  const digits = trimmed.replace(/\D/g, "");
-  return digits.length >= 9 && digits.length <= 15 && /^[+\d\s()-]+$/.test(trimmed);
+  if (mode === "username") return /^@[A-Za-z0-9_.]{3,64}$/.test(trimmed);
+  if (mode === "email") {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmed);
+  }
+
+  return isValidUkrainianMobilePhone(trimmed);
 }
 
 export default function LeadForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [serverMessage, setServerMessage] = useState("");
+  const [contactMode, setContactMode] = useState<ContactMode>("phone");
+  const [phoneValue, setPhoneValue] = useState("");
+  const [usernameValue, setUsernameValue] = useState("");
+  const [emailValue, setEmailValue] = useState("");
+  const [contactMethod, setContactMethod] = useState("");
+  const [objectType, setObjectType] = useState("");
+  const [stage, setStage] = useState("");
   const startedRef = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const contactInputRef = useRef<HTMLInputElement>(null);
 
   const onFirstInteraction = () => {
     if (!startedRef.current) {
       startedRef.current = true;
       trackEvent("form_start");
     }
+  };
+
+  const selectContactMode = (
+    mode: ContactMode,
+    event?: MouseEvent<HTMLButtonElement>,
+  ) => {
+    event?.preventDefault();
+    setContactMode(mode);
+    setErrors((current) => ({ ...current, phone: undefined }));
+    setContactMethod((current) => {
+      if (mode === "email") return "Email";
+      if (mode === "username") {
+        return usernameContactMethods.includes(current) ? current : "Telegram";
+      }
+      return phoneContactMethods.includes(current) ? current : "";
+    });
+    requestAnimationFrame(() => contactInputRef.current?.focus());
+  };
+
+  const onPhoneChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const rawValue = input.value;
+    const rawCaret = input.selectionStart ?? rawValue.length;
+    const parsed = parsePhone(rawValue);
+    const parsedBeforeCaret = parsePhone(rawValue.slice(0, rawCaret));
+
+    setPhoneValue(parsed.formatted);
+    setErrors((current) => ({ ...current, phone: undefined }));
+
+    requestAnimationFrame(() => {
+      const currentInput = contactInputRef.current;
+      if (!currentInput) return;
+      const caret = parsedBeforeCaret.digits.length
+        ? caretAfterDigits(parsed.formatted, parsedBeforeCaret.digits.length)
+        : parsedBeforeCaret.formatted.length;
+      currentInput.setSelectionRange(caret, caret);
+    });
+  };
+
+  const onUsernameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const rawValue = input.value;
+    const rawCaret = input.selectionStart ?? rawValue.length;
+    const normalized = normalizeUsername(rawValue);
+    const normalizedBeforeCaret = normalizeUsername(rawValue.slice(0, rawCaret));
+
+    setUsernameValue(normalized);
+    setErrors((current) => ({ ...current, phone: undefined }));
+
+    requestAnimationFrame(() => {
+      const currentInput = contactInputRef.current;
+      if (!currentInput) return;
+      const caret = Math.min(normalizedBeforeCaret.length, normalized.length);
+      currentInput.setSelectionRange(caret, caret);
+    });
+  };
+
+  const onEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setEmailValue(event.currentTarget.value.replace(/\s/g, "").slice(0, 254));
+    setErrors((current) => ({ ...current, phone: undefined }));
   };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -55,18 +227,22 @@ export default function LeadForm() {
 
     const nextErrors: FieldErrors = {};
     if (name.length < 2) nextErrors.name = "Вкажіть, як до вас звертатися.";
-    if (!validatePhone(phone))
-      nextErrors.phone = "Вкажіть номер телефону (напр. +380 …) або @нікнейм.";
-    if (!objectType) nextErrors.objectType = "Оберіть тип обʼєкта.";
+    if (!validateContact(phone, contactMode)) {
+      nextErrors.phone =
+        contactMode === "phone"
+          ? "Вкажіть коректний український мобільний номер."
+          : contactMode === "username"
+            ? "Вкажіть нікнейм щонайменше з 3 символів."
+            : "Вкажіть коректну email-адресу.";
+    }
 
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
       const fieldIds: Record<keyof FieldErrors, string> = {
         name: "lead-name",
         phone: "lead-phone",
-        objectType: "lead-object",
       };
-      const firstKey = (["name", "phone", "objectType"] as const).find(
+      const firstKey = (["name", "phone"] as const).find(
         (key) => nextErrors[key],
       );
       if (firstKey) document.getElementById(fieldIds[firstKey])?.focus();
@@ -116,11 +292,17 @@ export default function LeadForm() {
   };
 
   const inputCls = (invalid?: boolean) =>
-    `w-full rounded-button border bg-navy-deep/60 px-4 py-3.5 text-silver placeholder:text-silver-dim/50 transition-colors focus:border-blue focus:outline-none ${
-      invalid ? "border-red-400/70" : "border-silver/20 hover:border-silver/35"
+    `min-h-13 w-full rounded-xl border bg-navy-deep/65 px-4 py-3.5 text-silver shadow-[inset_0_1px_0_rgb(255_255_255/0.025)] placeholder:text-silver-dim/45 transition-[border-color,background-color,box-shadow] duration-200 focus:border-blue focus:bg-navy-deep/80 focus:shadow-[0_0_0_3px_rgb(33_180_255/0.12)] focus:outline-none ${
+      invalid ? "border-red-400/70" : "border-silver/18 hover:border-silver/35"
     }`;
 
   const labelCls = "mb-2 block text-sm font-medium text-silver";
+  const contactMethods =
+    contactMode === "phone"
+      ? phoneContactMethods
+      : contactMode === "email"
+        ? emailContactMethods
+        : usernameContactMethods;
 
   if (status === "success") {
     return (
@@ -156,7 +338,10 @@ export default function LeadForm() {
     >
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="lead-name" className={labelCls}>
+          <label
+            htmlFor="lead-name"
+            className="mb-2 flex min-h-11 items-center text-sm font-medium text-silver"
+          >
             Імʼя <span className="text-blue">*</span>
           </label>
           <input
@@ -178,20 +363,122 @@ export default function LeadForm() {
         </div>
 
         <div>
-          <label htmlFor="lead-phone" className={labelCls}>
-            Телефон або месенджер <span className="text-blue">*</span>
-          </label>
+          <div className="mb-2 flex min-h-11 flex-wrap items-center justify-between gap-2">
+            <label htmlFor="lead-phone" className="text-sm font-medium text-silver">
+              Контакт <span className="text-blue">*</span>
+            </label>
+            <div
+              role="group"
+              aria-label="Формат контакту"
+              className="grid grid-cols-3 rounded-lg border border-silver/12 bg-navy-deep/55 p-1"
+            >
+              <button
+                type="button"
+                aria-pressed={contactMode === "phone"}
+                onClick={(event) => selectContactMode("phone", event)}
+                className={`min-h-9 cursor-pointer rounded-md px-3 text-xs font-semibold transition-colors ${
+                  contactMode === "phone"
+                    ? "bg-blue text-navy-deep shadow-sm"
+                    : "text-silver-dim hover:bg-white/[0.05] hover:text-silver"
+                }`}
+              >
+                Номер
+              </button>
+              <button
+                type="button"
+                aria-pressed={contactMode === "username"}
+                onClick={(event) => selectContactMode("username", event)}
+                className={`min-h-9 cursor-pointer rounded-md px-3 text-xs font-semibold transition-colors ${
+                  contactMode === "username"
+                    ? "bg-blue text-navy-deep shadow-sm"
+                    : "text-silver-dim hover:bg-white/[0.05] hover:text-silver"
+                }`}
+              >
+                @нікнейм
+              </button>
+              <button
+                type="button"
+                aria-pressed={contactMode === "email"}
+                onClick={(event) => selectContactMode("email", event)}
+                className={`min-h-9 cursor-pointer rounded-md px-3 text-xs font-semibold transition-colors ${
+                  contactMode === "email"
+                    ? "bg-blue text-navy-deep shadow-sm"
+                    : "text-silver-dim hover:bg-white/[0.05] hover:text-silver"
+                }`}
+              >
+                Email
+              </button>
+            </div>
+          </div>
           <input
+            ref={contactInputRef}
             id="lead-phone"
             name="phone"
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
+            type={
+              contactMode === "phone"
+                ? "tel"
+                : contactMode === "email"
+                  ? "email"
+                  : "text"
+            }
+            inputMode={
+              contactMode === "phone"
+                ? "tel"
+                : contactMode === "email"
+                  ? "email"
+                  : "text"
+            }
+            autoComplete={
+              contactMode === "phone"
+                ? "tel"
+                : contactMode === "email"
+                  ? "email"
+                  : "username"
+            }
             required
             aria-invalid={errors.phone ? true : undefined}
             aria-describedby={errors.phone ? "lead-phone-error" : undefined}
             className={inputCls(!!errors.phone)}
-            placeholder="+380 __ ___ __ __"
+            placeholder={
+              contactMode === "phone"
+                ? "+380 __ ___ __ __"
+                : contactMode === "email"
+                  ? "name@example.com"
+                  : "@username"
+            }
+            value={
+              contactMode === "phone"
+                ? phoneValue
+                : contactMode === "email"
+                  ? emailValue
+                  : usernameValue
+            }
+            onChange={
+              contactMode === "phone"
+                ? onPhoneChange
+                : contactMode === "email"
+                  ? onEmailChange
+                  : onUsernameChange
+            }
+            onBlur={() => {
+              const value =
+                contactMode === "phone"
+                  ? phoneValue
+                  : contactMode === "email"
+                    ? emailValue
+                    : usernameValue;
+              if (value && !validateContact(value, contactMode)) {
+                setErrors((current) => ({
+                  ...current,
+                  phone:
+                    contactMode === "phone"
+                      ? "Вкажіть коректний український мобільний номер."
+                      : contactMode === "username"
+                        ? "Вкажіть нікнейм щонайменше з 3 символів."
+                        : "Вкажіть коректну email-адресу.",
+                }));
+              }
+            }}
           />
           {errors.phone && (
             <p id="lead-phone-error" className="mt-1.5 text-sm text-red-300">
@@ -202,50 +489,39 @@ export default function LeadForm() {
 
         <div>
           <label htmlFor="lead-object" className={labelCls}>
-            Тип обʼєкта <span className="text-blue">*</span>
+            Тип обʼєкта{" "}
+            <span className="font-normal text-silver-dim">(необовʼязково)</span>
           </label>
-          <select
+          <FormSelect
             id="lead-object"
             name="objectType"
-            required
-            defaultValue=""
-            aria-invalid={errors.objectType ? true : undefined}
-            aria-describedby={errors.objectType ? "lead-object-error" : undefined}
-            className={`${inputCls(!!errors.objectType)} appearance-none bg-[url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m4 6 4 4 4-4' stroke='%239fb0c8' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")] bg-[length:1rem] bg-[position:right_1rem_center] bg-no-repeat pr-10`}
-          >
-            <option value="" disabled>
-              Оберіть зі списку
-            </option>
-            {objectTypes.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-          {errors.objectType && (
-            <p id="lead-object-error" className="mt-1.5 text-sm text-red-300">
-              {errors.objectType}
-            </p>
-          )}
+            value={objectType}
+            placeholder="Оберіть зі списку"
+            ariaLabel="Тип обʼєкта"
+            options={[
+              { value: "", label: "Оберіть зі списку" },
+              ...objectTypes.map((type) => ({ value: type, label: type })),
+            ]}
+            onChange={setObjectType}
+          />
         </div>
 
         <div>
           <label htmlFor="lead-stage" className={labelCls}>
             Етап <span className="font-normal text-silver-dim">(необовʼязково)</span>
           </label>
-          <select
+          <FormSelect
             id="lead-stage"
             name="stage"
-            defaultValue=""
-            className={`${inputCls()} appearance-none bg-[url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m4 6 4 4 4-4' stroke='%239fb0c8' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")] bg-[length:1rem] bg-[position:right_1rem_center] bg-no-repeat pr-10`}
-          >
-            <option value="">Оберіть зі списку</option>
-            {stages.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
+            value={stage}
+            placeholder="Оберіть зі списку"
+            ariaLabel="Етап"
+            options={[
+              { value: "", label: "Оберіть зі списку" },
+              ...stages.map((item) => ({ value: item, label: item })),
+            ]}
+            onChange={setStage}
+          />
         </div>
 
         <div>
@@ -267,19 +543,21 @@ export default function LeadForm() {
             Як зручніше звʼязатися{" "}
             <span className="font-normal text-silver-dim">(необовʼязково)</span>
           </label>
-          <select
+          <FormSelect
             id="lead-contact-method"
             name="contactMethod"
-            defaultValue=""
-            className={`${inputCls()} appearance-none bg-[url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m4 6 4 4 4-4' stroke='%239fb0c8' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")] bg-[length:1rem] bg-[position:right_1rem_center] bg-no-repeat pr-10`}
-          >
-            <option value="">Будь-який спосіб</option>
-            {contactMethods.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
+            value={contactMethod}
+            placeholder="Будь-який спосіб"
+            ariaLabel="Бажаний спосіб звʼязку"
+            options={[
+              { value: "", label: "Будь-який спосіб" },
+              ...contactMethods.map((method) => ({
+                value: method,
+                label: method,
+              })),
+            ]}
+            onChange={setContactMethod}
+          />
         </div>
 
         <div className="sm:col-span-2">

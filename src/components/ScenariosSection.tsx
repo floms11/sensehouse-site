@@ -3,7 +3,7 @@ import SectionHeading from "./SectionHeading";
 
 export default function ScenariosSection() {
   return (
-    <section id="scenarios" className="relative scroll-mt-24 bg-navy-deep/60 py-24 sm:py-32">
+    <section id="scenarios" className="relative bg-navy-deep/60 py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <SectionHeading
           eyebrow="Можливості"

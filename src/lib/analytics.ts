@@ -22,6 +22,7 @@ export type AnalyticsEvent =
   | "form_submit_error"
   | "scenario_change"
   | "project_page_change"
+  | "project_sheet_open"
   | "process_section_view"
   | "final_cta_view";
 

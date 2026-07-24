@@ -1,0 +1,26 @@
+[Unit]
+Description=SenseHouse website production server
+After=network.target sensehouse-crm.service
+Wants=sensehouse-crm.service
+RequiresMountsFor=/opt/sensehouse-site/app
+
+[Service]
+Type=simple
+User=sensehouse-site
+Group=sensehouse-site
+WorkingDirectory=/opt/sensehouse-site/app
+EnvironmentFile=/etc/sensehouse-site.env
+ExecStart=/usr/bin/npm run start -- --hostname 0.0.0.0 --port 8088
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+KillSignal=SIGINT
+UMask=0027
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/opt/sensehouse-site/app/.next
+
+[Install]
+WantedBy=multi-user.target

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { forwardLead, type LeadPayload } from "@/lib/lead-adapter";
+import { isValidUkrainianMobilePhone } from "@/lib/contact-validation";
 
 /**
  * Прийом заявок з форми.
@@ -33,6 +34,12 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
+function isValidContact(value: string): boolean {
+  if (/^@[A-Za-z0-9_.]{3,64}$/.test(value)) return true;
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) return true;
+  return isValidUkrainianMobilePhone(value);
+}
+
 export async function POST(request: Request) {
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
@@ -60,9 +67,9 @@ export async function POST(request: Request) {
   const phone = String(body.phone ?? "").trim();
   const objectType = String(body.objectType ?? "").trim();
 
-  if (name.length < 2 || phone.length < 5 || !objectType) {
+  if (name.length < 2 || !isValidContact(phone)) {
     return NextResponse.json(
-      { message: "Заповніть обовʼязкові поля: імʼя, телефон, тип обʼєкта." },
+      { message: "Заповніть обовʼязкові поля: імʼя та контакт." },
       { status: 422 },
     );
   }

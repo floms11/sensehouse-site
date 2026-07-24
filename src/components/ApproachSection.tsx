@@ -31,8 +31,12 @@ const facts = [
 
 export default function ApproachSection() {
   return (
-    <section id="approach" className="scroll-mt-24 bg-silver py-24 text-navy sm:py-32">
-      <div className="blueprint-grid--light blueprint-grid mx-auto max-w-6xl px-5 sm:px-8">
+    <section id="approach" className="relative overflow-hidden bg-silver py-24 text-navy sm:py-32">
+      <div
+        aria-hidden="true"
+        className="blueprint-grid--light blueprint-grid pointer-events-none absolute inset-y-0 left-1/2 w-full max-w-6xl -translate-x-1/2"
+      />
+      <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
         <SectionHeading
           eyebrow="Підхід"
           title="Спочатку проєктуємо логіку. Потім монтуємо."
@@ -53,9 +57,12 @@ export default function ApproachSection() {
             <ProjectShowcase />
 
             {/* Факти проєкту — тонкий статистичний ряд */}
-            <dl className="mt-10 grid grid-cols-4 divide-x divide-navy/10 border-y border-navy/10 py-5">
+            <dl className="mt-10 grid grid-cols-2 border-y border-navy/10 py-3 sm:grid-cols-4 sm:divide-x sm:py-5">
               {facts.map(([value, label]) => (
-                <div key={label} className="px-3 text-center first:pl-0 last:pr-0 sm:px-5">
+                <div
+                  key={label}
+                  className="px-3 py-3 text-center odd:border-r odd:border-navy/10 first:pl-0 last:pr-0 sm:border-0 sm:px-5 sm:py-0"
+                >
                   <dt className="order-2 mt-1 block text-[0.72rem] leading-tight text-navy/55 sm:text-[0.78rem]">
                     {label}
                   </dt>
@@ -66,7 +73,7 @@ export default function ApproachSection() {
               ))}
             </dl>
             <p className="mt-3 text-xs text-navy/45">
-              Сторінки реального технічного проєкту Sense House «Власна оселя 001».
+              Фрагменти робочої технічної документації Sense House.
             </p>
           </Reveal>
 

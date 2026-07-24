@@ -98,8 +98,8 @@ function formatTelegramMessage(lead: LeadPayload): string {
     "",
     `Імʼя: ${lead.name}`,
     `Контакт: ${lead.phone}`,
-    `Тип обʼєкта: ${lead.objectType}`,
   ];
+  if (lead.objectType) lines.push(`Тип обʼєкта: ${lead.objectType}`);
   if (lead.area) lines.push(`Площа: ${lead.area} м²`);
   if (lead.stage) lines.push(`Етап: ${lead.stage}`);
   if (lead.contactMethod) lines.push(`Звʼязок: ${lead.contactMethod}`);

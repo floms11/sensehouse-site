@@ -34,7 +34,7 @@ export default function FinalCTA() {
     <section
       ref={ref}
       id="contact"
-      className="blueprint-grid relative scroll-mt-24 overflow-hidden py-24 sm:py-32"
+      className="blueprint-grid relative overflow-hidden py-24 sm:py-32"
     >
       {/* Мʼяке світіння за формою */}
       <div
