@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { trackEvent } from "@/lib/analytics";
 import { isValidUkrainianMobilePhone } from "@/lib/contact-validation";
@@ -46,6 +46,41 @@ export default function LeadForm() {
     stage: "",
   });
   const startedRef = useRef(false);
+  const successRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (
+      status !== "success" ||
+      !window.matchMedia("(max-width: 767px)").matches
+    ) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      const success = successRef.current;
+      if (!success) return;
+
+      const headerOffset =
+        document.querySelector<HTMLElement>("header")?.getBoundingClientRect()
+          .height ?? 0;
+      const top = Math.max(
+        0,
+        window.scrollY +
+          success.getBoundingClientRect().top -
+          headerOffset -
+          16,
+      );
+      const behavior = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches
+        ? "auto"
+        : "smooth";
+
+      window.scrollTo({ top, behavior });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [status]);
 
   const onFirstInteraction = () => {
     if (startedRef.current) return;
@@ -144,6 +179,7 @@ export default function LeadForm() {
   if (status === "success") {
     return (
       <div
+        ref={successRef}
         role="status"
         aria-live="polite"
         className="rounded-card border border-blue/30 bg-graphite/75 p-8 sm:p-10"

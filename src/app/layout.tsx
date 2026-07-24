@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Manrope, Space_Grotesk } from "next/font/google";
 import { site } from "@/config/site";
 import { GA_ID, META_PIXEL_ID } from "@/lib/analytics";
+import CleanAnchorNavigation from "@/components/CleanAnchorNavigation";
 import "./globals.css";
 
 /**
@@ -74,6 +75,7 @@ export default function RootLayout({
       className={`${manrope.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        <CleanAnchorNavigation />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[60] focus:rounded-button focus:bg-blue focus:px-5 focus:py-3 focus:font-semibold focus:text-navy-deep"
