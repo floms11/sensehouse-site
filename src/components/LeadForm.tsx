@@ -16,7 +16,7 @@ const stages = [
 ];
 
 type Status = "idle" | "loading" | "success" | "error";
-type FieldName = "name" | "phone" | "comment";
+type FieldName = "name" | "phone";
 type FieldErrors = Partial<Record<FieldName, string>>;
 
 function normalizedTelegram(value: string): string {
@@ -55,7 +55,7 @@ export default function LeadForm() {
 
   const setValue = (field: keyof typeof values, value: string) => {
     setValues((current) => ({ ...current, [field]: value }));
-    if (field === "name" || field === "phone" || field === "comment") {
+    if (field === "name" || field === "phone") {
       setErrors((current) => ({ ...current, [field]: undefined }));
     }
   };
@@ -69,9 +69,6 @@ export default function LeadForm() {
       nextErrors.phone =
         "Вкажіть український мобільний номер або Telegram у форматі @username.";
     }
-    if (values.comment.trim().length < 8) {
-      nextErrors.comment = "Коротко опишіть обʼєкт або задачу.";
-    }
     return nextErrors;
   };
 
@@ -82,7 +79,7 @@ export default function LeadForm() {
     const nextErrors = validate();
     setErrors(nextErrors);
 
-    const firstError = (["name", "phone", "comment"] as const).find(
+    const firstError = (["name", "phone"] as const).find(
       (field) => nextErrors[field],
     );
     if (firstError) {
@@ -255,27 +252,20 @@ export default function LeadForm() {
 
         <div className="sm:col-span-2">
           <label htmlFor="lead-comment" className={labelClass}>
-            Коротко про обʼєкт <span className="text-blue">*</span>
+            Коротко про обʼєкт{" "}
+            <span className="font-normal text-silver-dim">(необовʼязково)</span>
           </label>
           <textarea
             id="lead-comment"
             name="comment"
             rows={4}
-            required
             value={values.comment}
             onChange={(event) =>
               setValue("comment", event.currentTarget.value.slice(0, 2000))
             }
-            aria-invalid={errors.comment ? true : undefined}
-            aria-describedby={errors.comment ? "lead-comment-error" : undefined}
-            className={`${inputClass(Boolean(errors.comment))} resize-y`}
+            className={`${inputClass()} resize-y`}
             placeholder="Наприклад: приватний будинок на етапі планування, потрібна електрика й резервне живлення"
           />
-          {errors.comment && (
-            <p id="lead-comment-error" className="mt-2 text-sm text-red-200">
-              {errors.comment}
-            </p>
-          )}
         </div>
       </div>
 
