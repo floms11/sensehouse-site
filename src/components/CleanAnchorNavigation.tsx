@@ -101,6 +101,17 @@ export default function CleanAnchorNavigation() {
   }, []);
 
   useEffect(() => {
+    let pendingFrame = 0;
+
+    const scheduleScroll = (targetId: string) => {
+      window.cancelAnimationFrame(pendingFrame);
+      pendingFrame = window.requestAnimationFrame(() => {
+        pendingFrame = window.requestAnimationFrame(() => {
+          scrollToTarget(targetId);
+        });
+      });
+    };
+
     const onClick = (event: MouseEvent) => {
       if (
         event.defaultPrevented ||
@@ -134,9 +145,12 @@ export default function CleanAnchorNavigation() {
         url.search === window.location.search;
 
       if (samePage) {
-        if (!scrollToTarget(targetId)) return;
+        if (!document.getElementById(targetId)) return;
         event.preventDefault();
         cleanCurrentUrl();
+        // React спершу закриває мобільне меню й знімає overflow: hidden,
+        // після чого виконуємо точний скрол до секції.
+        scheduleScroll(targetId);
         return;
       }
 
@@ -145,7 +159,10 @@ export default function CleanAnchorNavigation() {
     };
 
     document.addEventListener("click", onClick, true);
-    return () => document.removeEventListener("click", onClick, true);
+    return () => {
+      window.cancelAnimationFrame(pendingFrame);
+      document.removeEventListener("click", onClick, true);
+    };
   }, [router]);
 
   return null;
