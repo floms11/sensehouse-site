@@ -24,14 +24,25 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
-const title = "Електрика та розумний дім під ключ у Кропивницькому | Sense House";
+const title =
+  "Електрика та інженерні системи під ключ у Кропивницькому | Sense House";
 const description =
-  "Проєктування, електромонтаж і розумний дім під ключ у Кропивницькому та області. Електрика, світло, клімат, безпека, мережа й сценарії в одній системі.";
+  "Проєктування й реалізація електрики та розумного дому: електрощити, автоматизація, резервне живлення, мережа й безпека для приватних будинків у Кропивницькому та області.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title,
   description,
+  keywords: [
+    "розумний дім",
+    "розумний будинок",
+    "розумний дім Кропивницький",
+    "розумний будинок Кропивницький",
+    "автоматизація будинку",
+    "електромонтаж Кропивницький",
+    "електрика під ключ",
+    "інженерні системи будинку",
+  ],
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
@@ -49,16 +60,16 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-/** ProfessionalService structured data — лише підтверджені дані. */
+/** LocalBusiness structured data — лише підтверджені дані. */
 const structuredData = {
   "@context": "https://schema.org",
-  "@type": "ProfessionalService",
+  "@type": "LocalBusiness",
   name: site.name,
   description:
-    "Електрика та розумний дім під ключ: проєктування, електромонтаж, збірка щитів, автоматизація, безпека, мережа та резервне живлення.",
+    "Проєктування та реалізація електрики, розумного дому й інженерних систем для приватних будинків: електрощити, автоматизація, безпека, мережа та резервне живлення.",
   url: site.url,
   telephone: site.phone.e164,
-  sameAs: [site.social.instagram],
+  sameAs: [site.social.instagram, site.social.telegram].filter(Boolean),
   areaServed: [
     { "@type": "City", name: "Кропивницький" },
     { "@type": "AdministrativeArea", name: "Кіровоградська область" },
@@ -67,6 +78,7 @@ const structuredData = {
     "Електромонтаж",
     "Проєктування електрики",
     "Розумний дім",
+    "Розумний будинок",
     "Автоматизація будинку",
     "Монтаж електрощитів",
     "Резервне живлення",
@@ -86,6 +98,12 @@ export default function RootLayout({
       className={`${manrope.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[60] focus:rounded-button focus:bg-blue focus:px-5 focus:py-3 focus:font-semibold focus:text-navy-deep"
+        >
+          Перейти до змісту
+        </a>
         {children}
 
         <script

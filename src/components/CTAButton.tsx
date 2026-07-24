@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type MouseEvent, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { trackEvent, type AnalyticsEvent } from "@/lib/analytics";
 
 type CTAButtonProps = {
@@ -13,11 +13,6 @@ type CTAButtonProps = {
   className?: string;
 };
 
-/**
- * Головна кнопка дії з subtle magnetic hover.
- * Магнітний зсув мінімальний (до 3px) і вимикається
- * для prefers-reduced-motion та touch-пристроїв.
- */
 export default function CTAButton({
   href,
   children,
@@ -27,22 +22,6 @@ export default function CTAButton({
   eventParams,
   className = "",
 }: CTAButtonProps) {
-  const ref = useRef<HTMLAnchorElement>(null);
-
-  const onMouseMove = (e: MouseEvent<HTMLAnchorElement>) => {
-    const el = ref.current;
-    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches)
-      return;
-    const rect = el.getBoundingClientRect();
-    const dx = (e.clientX - rect.left - rect.width / 2) / rect.width;
-    const dy = (e.clientY - rect.top - rect.height / 2) / rect.height;
-    el.style.translate = `${dx * 6}px ${dy * 4}px`;
-  };
-
-  const onMouseLeave = () => {
-    if (ref.current) ref.current.style.translate = "0 0";
-  };
-
   const variants: Record<string, string> = {
     primary:
       "bg-blue text-navy-deep font-semibold hover:bg-blue-soft hover:shadow-glow-blue active:bg-blue",
@@ -58,12 +37,9 @@ export default function CTAButton({
 
   return (
     <a
-      ref={ref}
       href={href}
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
       onClick={() => event && trackEvent(event, eventParams)}
-      className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-button transition-[background-color,border-color,box-shadow,color,filter,translate] duration-300 ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-button text-center transition-[background-color,border-color,box-shadow,color,filter] duration-200 ${variants[variant]} ${sizes[size]} ${className}`}
     >
       {children}
     </a>

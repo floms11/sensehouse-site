@@ -237,12 +237,11 @@ export default function ProjectShowcase() {
 
   return (
     <div data-testid="project-showcase">
-      {/* Категорії — без вкладеного скролу та системного scrollbar */}
       <div
         role="tablist"
         aria-label="Розділи технічного проєкту"
         onKeyDown={onTabKeyDown}
-        className="grid grid-cols-5 border-b border-navy/10"
+        className="grid grid-cols-2 border-b border-navy/10 sm:grid-cols-5"
       >
         {groups.map((g, i) => (
           <button
@@ -256,7 +255,7 @@ export default function ProjectShowcase() {
             aria-controls={`${baseId}-panel`}
             tabIndex={i === groupIdx ? 0 : -1}
             onClick={() => selectGroup(i)}
-            className={`-mb-px flex min-h-11 min-w-0 cursor-pointer items-center justify-center border-b-2 px-0.5 pt-1 text-center text-[0.56rem] font-semibold tracking-[0.035em] uppercase transition-[color,border-color,background-color] duration-200 xs:text-[0.61rem] sm:px-1 sm:text-[0.7rem] sm:tracking-[0.08em] ${
+            className={`-mb-px flex min-h-12 min-w-0 cursor-pointer items-center justify-center border-b-2 px-2 py-2 text-center text-[0.72rem] font-semibold tracking-[0.06em] uppercase transition-[color,border-color,background-color] duration-200 last:col-span-2 sm:min-h-11 sm:px-1 sm:text-[0.7rem] sm:tracking-[0.08em] sm:last:col-span-1 ${
               i === groupIdx
                 ? "border-blue text-navy"
                 : "border-transparent text-navy/45 hover:bg-white/20 hover:text-navy/75"

@@ -5,7 +5,7 @@ import { site } from "@/config/site";
 import { trackEvent } from "@/lib/analytics";
 
 /**
- * Sticky contact bar для мобільних: телефон, заявка, Instagram.
+ * Sticky contact bar для мобільних: телефон, заявка, Telegram.
  * Зʼявляється після першого екрана, ховається біля фінальної форми,
  * щоб не перекривати її.
  */
@@ -60,20 +60,25 @@ export default function MobileContactBar() {
         >
           Обговорити проєкт
         </a>
-        <a
-          href={site.social.instagram}
+        {site.social.telegram && (
+          <a
+          href={site.social.telegram}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => trackEvent("instagram_click", { placement: "sticky_bar" })}
-          aria-label="Instagram Sense House"
+          onClick={() => trackEvent("telegram_click", { placement: "sticky_bar" })}
+          aria-label="Написати Sense House у Telegram"
           className="inline-flex min-h-12 flex-none items-center justify-center rounded-xl border border-silver/20 px-4 text-silver"
         >
           <svg viewBox="0 0 24 24" className="size-5" fill="none" aria-hidden="true">
-            <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.6" />
-            <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.6" />
-            <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" />
+            <path
+              d="m4 11.2 15-6.1c.7-.3 1.3.4 1 1.1l-5.1 13.1c-.2.6-1 .7-1.4.3l-3.2-3-2 1.9.3-3.7 7.6-6.1-9.4 5-2.9-1.2c-.7-.3-.7-1 0-1.3Z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinejoin="round"
+            />
           </svg>
         </a>
+        )}
       </div>
     </div>
   );

@@ -2,107 +2,88 @@ import ProjectShowcase from "./ProjectShowcase";
 import Reveal from "./Reveal";
 import SectionHeading from "./SectionHeading";
 
-const proofs = [
+const documents = [
   {
-    title: "Детальний технічний проєкт",
-    text: "Плани розеток і освітлення, кабельні траси, щитова та логіка системи — усе визначено до початку монтажу.",
+    title: "Плани та розгортки",
+    text: "Фіксують розташування точок, обладнання й трас, щоб монтаж відповідав плануванню та інтерʼєру.",
   },
   {
-    title: "Кабельний журнал і маркування",
-    text: "Кожна лінія має код, призначення та місце в щиті. Через роки будь-який фахівець розбереться в системі.",
+    title: "Кабельний журнал",
+    text: "Повʼязує кожну лінію з її призначенням, маркою кабелю та місцем підключення.",
   },
   {
-    title: "Фіксація прихованих робіт",
-    text: "Фото- та відеофіксація трас до закриття стін. Ви завжди знаєте, що і де прокладено.",
+    title: "Схеми електрощитів",
+    text: "Показують захист, компонування та звʼязки — щит можна перевірити до складання й обслуговувати після запуску.",
   },
   {
-    title: "Налаштування під ваші звички",
-    text: "Сценарії та документація передаються після запуску, а система налаштовується під те, як ви живете.",
+    title: "Маркування",
+    text: "Коди на кресленнях, кабелях і в щитах збігаються, тому систему не потрібно вивчати заново під час сервісу.",
   },
-];
-
-/** Факти з реального проєкту «Власна оселя 001» */
-const facts = [
-  ["92", "м² обʼєкта"],
-  ["83", "кабельні лінії"],
-  ["3", "електрощити"],
-  ["147", "аркушів"],
+  {
+    title: "Фотофіксація",
+    text: "Положення прихованих трас зберігається до закриття стін і доповнює комплект документації по обʼєкту.",
+  },
 ];
 
 export default function ApproachSection() {
   return (
-    <section id="approach" className="relative overflow-hidden bg-silver py-24 text-navy sm:py-32">
+    <section
+      id="design"
+      aria-labelledby="design-title"
+      className="relative overflow-hidden bg-silver py-24 text-navy sm:py-32"
+    >
       <div
         aria-hidden="true"
-        className="blueprint-grid--light blueprint-grid pointer-events-none absolute inset-y-0 left-1/2 w-full max-w-6xl -translate-x-1/2"
+        className="blueprint-grid--light blueprint-grid pointer-events-none absolute inset-0"
       />
-      <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
-        <SectionHeading
-          eyebrow="Підхід"
-          title="Спочатку проєктуємо логіку. Потім монтуємо."
-          onLight
-          description={
-            <>
-              Ми дивимося на будинок як на єдину систему. До початку монтажу
-              визначаємо функціонал, сценарії, розміщення обладнання, кабельні
-              траси, щити, мережу та майбутні інтеграції. Ви заздалегідь
-              розумієте склад системи, матеріали й логіку реалізації.
-            </>
-          }
-        />
+      <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)] lg:items-end lg:gap-20">
+          <SectionHeading
+            eyebrow="Проєктування"
+            title={<span id="design-title">Документація, що працює і під час монтажу, і після нього</span>}
+            onLight
+          />
+          <Reveal>
+            <p className="max-w-2xl text-base leading-relaxed text-navy/70 sm:text-lg">
+              Технічний проєкт переводить побажання у перевірювані рішення.
+              Він узгоджує будівельні роботи, електрику та автоматику, зменшує
+              кількість рішень “на місці” й залишається картою системи після
+              запуску.
+            </p>
+          </Reveal>
+        </div>
 
-        <div className="mt-14 grid items-start gap-14 lg:mt-16 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-20">
-          {/* Реальний проєкт — стриманий обʼєкт, не банер */}
-          <Reveal delay={100}>
+        <div className="mt-14 grid items-start gap-14 lg:mt-18 lg:grid-cols-[minmax(0,1.25fr)_minmax(20rem,.75fr)] lg:gap-20">
+          <Reveal delay={80}>
             <ProjectShowcase />
-
-            {/* Факти проєкту — тонкий статистичний ряд */}
-            <dl className="mt-10 grid grid-cols-2 border-y border-navy/10 py-3 sm:grid-cols-4 sm:divide-x sm:py-5">
-              {facts.map(([value, label]) => (
-                <div
-                  key={label}
-                  className="px-3 py-3 text-center odd:border-r odd:border-navy/10 first:pl-0 last:pr-0 sm:border-0 sm:px-5 sm:py-0"
-                >
-                  <dt className="order-2 mt-1 block text-[0.72rem] leading-tight text-navy/55 sm:text-[0.78rem]">
-                    {label}
-                  </dt>
-                  <dd className="font-display text-xl font-semibold tracking-tight text-navy sm:text-2xl">
-                    {value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-            <p className="mt-3 text-xs text-navy/45">
-              Фрагменти робочої технічної документації Sense House.
+            <p className="mt-4 text-xs leading-relaxed text-navy/55">
+              Фрагменти робочої технічної документації Sense House. Вміст
+              комплекту формується під конкретний обʼєкт і обсяг робіт.
             </p>
           </Reveal>
 
-          {/* Підтвердження системного підходу */}
-          <div className="flex flex-col gap-9 lg:pt-2">
-            {proofs.map((proof, i) => (
-              <Reveal key={proof.title} delay={i * 100}>
-                <div className="flex gap-4">
-                  <div aria-hidden="true" className="mt-2 h-px w-8 shrink-0 bg-blue" />
-                  <div>
-                    <h3 className="text-lg font-bold tracking-tight text-navy">
-                      {proof.title}
-                    </h3>
-                    <p className="mt-2 text-[0.95rem] leading-relaxed text-navy/70">
-                      {proof.text}
-                    </p>
-                  </div>
+          <ol className="divide-y divide-navy/12 border-y border-navy/12">
+            {documents.map((document, index) => (
+              <Reveal
+                as="li"
+                key={document.title}
+                delay={index * 60}
+                className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 py-5"
+              >
+                <span className="font-display text-xs font-semibold tracking-[0.16em] text-blue">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <div>
+                  <h3 className="font-bold tracking-tight text-navy">
+                    {document.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-navy/68">
+                    {document.text}
+                  </p>
                 </div>
               </Reveal>
             ))}
-
-            <Reveal delay={400}>
-              <p className="border-t border-navy/10 pt-6 text-sm leading-relaxed text-navy/60">
-                Працюємо з перевіреними платформами автоматизації — зокрема
-                Svit та i3, а також Loxone і Home Assistant — і підбираємо
-                рішення під задачі конкретного будинку, а не навпаки.
-              </p>
-            </Reveal>
-          </div>
+          </ol>
         </div>
       </div>
     </section>

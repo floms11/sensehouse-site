@@ -1,78 +1,74 @@
-import type { CSSProperties } from "react";
 import CTAButton from "./CTAButton";
 import HeroScene from "./HeroScene";
 import { site } from "@/config/site";
-
-/** CSS-only reveal: hero не чекає на hydration (важливо для LCP). */
-function introDelay(ms: number): CSSProperties {
-  return { "--reveal-delay": `${ms}ms` } as CSSProperties;
-}
 
 export default function Hero() {
   return (
     <section
       id="top"
-      className="blueprint-grid relative overflow-hidden pt-32 pb-16 sm:pt-40 lg:pb-24"
+      aria-labelledby="hero-title"
+      className="blueprint-grid relative isolate min-h-[min(900px,100svh)] overflow-hidden pt-28 pb-14 sm:pt-36 sm:pb-20 xl:flex xl:items-center xl:pt-32"
     >
-      {/* Мʼяке світіння за сценою */}
       <div
         aria-hidden="true"
-        className="absolute top-1/3 right-[-10%] h-[36rem] w-[36rem] rounded-full bg-blue/[0.06] blur-3xl"
+        className="absolute top-1/4 right-[-12rem] -z-10 size-[36rem] rounded-full bg-blue/[0.07] blur-3xl"
       />
 
-      <div className="mx-auto grid max-w-6xl items-center gap-14 px-5 sm:px-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-10">
+      <div className="mx-auto grid w-full max-w-7xl items-center gap-12 px-5 sm:px-8 xl:grid-cols-[minmax(0,1.02fr)_minmax(30rem,.98fr)] xl:gap-8">
         <div className="relative z-10">
-          <p
-            className="intro font-display mb-5 text-[0.8rem] font-medium tracking-[0.22em] text-blue uppercase"
-            style={introDelay(0)}
-          >
-            {site.tagline}
+          <p className="mb-5 flex items-center gap-3 text-[0.76rem] font-semibold tracking-[0.18em] text-blue uppercase">
+            <span aria-hidden="true" className="size-1.5 rounded-full bg-gold" />
+            {site.geo.primary} · {site.geo.region}
           </p>
 
           <h1
-            className="intro text-balance text-4xl leading-[1.08] font-bold tracking-tight text-silver sm:text-5xl lg:text-[3.5rem]"
-            style={introDelay(100)}
+            id="hero-title"
+            className="text-balance text-[clamp(2.45rem,6vw,4.6rem)] leading-[1.02] font-bold tracking-[-0.045em] text-silver"
           >
-            Будинок, у якому все працює як&nbsp;одне ціле.
+            Електрика та інженерні системи під ключ
           </h1>
 
-          <p
-            className="intro mt-6 max-w-lg text-base leading-relaxed text-silver-dim sm:text-lg"
-            style={introDelay(200)}
-          >
-            Проєктуємо, монтуємо та налаштовуємо електрику, світло, клімат,
-            безпеку, мережу й сценарії — від першого креслення до запуску
-            системи.
+          <p className="mt-6 max-w-xl text-base leading-relaxed text-silver-dim sm:text-lg">
+            Проєктуємо, монтуємо й запускаємо електрику та розумний дім:
+            електрощити, освітлення, клімат, безпеку, резервне живлення й
+            мережу — з єдиною логікою керування та технічною документацією.
           </p>
 
-          <div
-            className="intro mt-9 flex flex-col gap-3 xs:flex-row xs:items-center"
-            style={introDelay(300)}
-          >
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
             <CTAButton href="#contact" size="lg" event="hero_cta_click">
               Обговорити проєкт
             </CTAButton>
             <CTAButton
-              href={`tel:${site.phone.e164}`}
+              href="#process"
               variant="ghost"
               size="lg"
-              event="phone_click"
-              eventParams={{ placement: "hero" }}
             >
-              Зателефонувати
+              Дізнатися, як ми працюємо
             </CTAButton>
           </div>
 
-          <p
-            className="intro mt-7 text-sm text-silver-dim/80"
-            style={introDelay(400)}
+          <a
+            href={`tel:${site.phone.e164}`}
+            className="mt-7 inline-flex min-h-11 items-center gap-3 text-sm font-semibold text-silver transition-colors hover:text-blue-soft"
           >
-            {site.geo.primary} та {site.geo.region}. {site.geo.note}
-          </p>
+            <span aria-hidden="true" className="h-px w-7 bg-blue/70" />
+            {site.phone.display}
+          </a>
         </div>
 
-        <div className="intro relative" style={introDelay(250)}>
-          <HeroScene className="h-auto w-full drop-shadow-[0_40px_60px_rgba(3,8,20,0.5)]" />
+        <div
+          className="is-visible relative overflow-hidden rounded-[1.5rem] border border-silver/10 bg-navy-deep/55 p-1 shadow-[0_32px_90px_-40px_rgb(0_0_0/0.9)]"
+        >
+          <div className="flex items-center justify-between border-b border-silver/10 px-4 py-3">
+            <span className="font-display text-[0.62rem] font-medium tracking-[0.2em] text-silver-dim uppercase">
+              System architecture
+            </span>
+            <span className="flex items-center gap-2 text-[0.7rem] text-silver-dim">
+              <span aria-hidden="true" className="size-1.5 rounded-full bg-blue" />
+              Єдина логіка
+            </span>
+          </div>
+          <HeroScene className="h-auto w-full" />
         </div>
       </div>
     </section>

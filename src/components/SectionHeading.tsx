@@ -26,7 +26,7 @@ export default function SectionHeading({
     <Reveal className={`max-w-2xl ${alignCls} ${className}`}>
       {eyebrow && (
         <p
-          className={`font-display text-[0.8rem] font-medium tracking-[0.22em] uppercase mb-4 ${
+          className={`mb-4 text-[0.76rem] font-semibold tracking-[0.18em] uppercase ${
             onLight ? "text-navy/60" : "text-blue"
           }`}
         >

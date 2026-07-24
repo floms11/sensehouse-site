@@ -35,12 +35,26 @@ function isRateLimited(ip: string): boolean {
 }
 
 function isValidContact(value: string): boolean {
-  if (/^@[A-Za-z0-9_.]{3,64}$/.test(value)) return true;
-  if (/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) return true;
+  if (/^@[A-Za-z0-9_]{3,64}$/.test(value)) return true;
   return isValidUkrainianMobilePhone(value);
 }
 
 export async function POST(request: Request) {
+  const contentType = request.headers.get("content-type") ?? "";
+  if (!contentType.toLowerCase().startsWith("application/json")) {
+    return NextResponse.json({ message: "Некоректний формат запиту." }, { status: 415 });
+  }
+
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  if (Number.isFinite(contentLength) && contentLength > 16_384) {
+    return NextResponse.json({ message: "Запит завеликий." }, { status: 413 });
+  }
+
+  const fetchSite = request.headers.get("sec-fetch-site");
+  if (fetchSite && !["same-origin", "same-site", "none"].includes(fetchSite)) {
+    return NextResponse.json({ message: "Запит відхилено." }, { status: 403 });
+  }
+
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   if (isRateLimited(ip)) {
@@ -66,10 +80,22 @@ export async function POST(request: Request) {
   const name = String(body.name ?? "").trim();
   const phone = String(body.phone ?? "").trim();
   const objectType = String(body.objectType ?? "").trim();
+  const comment = String(body.comment ?? "").trim();
+  const area = String(body.area ?? "").trim();
 
-  if (name.length < 2 || !isValidContact(phone)) {
+  if (
+    name.length < 2 ||
+    name.length > 200 ||
+    !isValidContact(phone) ||
+    comment.length < 8 ||
+    comment.length > 2000 ||
+    (area && !/^\d{1,5}$/.test(area))
+  ) {
     return NextResponse.json(
-      { message: "Заповніть обовʼязкові поля: імʼя та контакт." },
+      {
+        message:
+          "Перевірте імʼя, контакт, опис обʼєкта та необовʼязкову площу.",
+      },
       { status: 422 },
     );
   }
@@ -78,9 +104,9 @@ export async function POST(request: Request) {
     name: name.slice(0, 200),
     phone: phone.slice(0, 100),
     objectType: objectType.slice(0, 100),
-    area: String(body.area ?? "").slice(0, 50),
+    area,
     stage: String(body.stage ?? "").slice(0, 100),
-    comment: String(body.comment ?? "").slice(0, 2000),
+    comment,
     contactMethod: String(body.contactMethod ?? "").slice(0, 50),
   };
 
@@ -94,7 +120,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         message:
-          "Форма тимчасово не працює. Зателефонуйте нам або напишіть в Instagram — відповімо швидко.",
+          "Форма тимчасово не працює. Дані збережено у формі — зателефонуйте нам або напишіть у Telegram.",
       },
       { status: 503 },
     );

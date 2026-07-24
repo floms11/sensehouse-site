@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import ContactActions from "./ContactActions";
-import HousePulse from "./HousePulse";
 import LeadForm from "./LeadForm";
 import Reveal from "./Reveal";
 import { site } from "@/config/site";
@@ -42,15 +41,17 @@ export default function FinalCTA() {
         className="absolute bottom-0 left-1/2 h-[28rem] w-[44rem] -translate-x-1/2 rounded-full bg-blue/[0.07] blur-3xl"
       />
 
-      <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
+      <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <HousePulse className="mx-auto mb-10 h-8" />
+          <p className="mb-5 text-[0.76rem] font-semibold tracking-[0.18em] text-blue uppercase">
+            Контакти
+          </p>
           <h2 className="text-balance text-3xl leading-[1.12] font-bold tracking-tight text-silver sm:text-4xl lg:text-[2.75rem]">
-            Розкажіть, на якому етапі ваш будинок.
+            Почнімо з вашого обʼєкта
           </h2>
           <p className="mt-5 text-base leading-relaxed text-silver-dim sm:text-lg">
-            Обговоримо ваші побажання, визначимо потрібні системи та підкажемо,
-            з чого почати.
+            Коротко опишіть задачу. У відповідь обговоримо вихідні дані й
+            визначимо, з якого інженерного етапу варто почати.
           </p>
         </Reveal>
 
@@ -60,23 +61,22 @@ export default function FinalCTA() {
           </Reveal>
 
           <Reveal delay={200} className="lg:pt-2">
-            <h3 className="font-display text-[0.8rem] font-medium tracking-[0.22em] text-blue uppercase">
-              Контакти
+            <h3 className="text-[0.75rem] font-semibold tracking-[0.18em] text-blue uppercase">
+              Звʼязатися напряму
             </h3>
             <div className="mt-6">
               <ContactActions layout="full" />
             </div>
 
             <div className="mt-10 border-t border-silver/10 pt-8">
-              <h3 className="font-display text-[0.8rem] font-medium tracking-[0.22em] text-blue uppercase">
+              <h3 className="text-[0.75rem] font-semibold tracking-[0.18em] text-blue uppercase">
                 Географія
               </h3>
               <p className="mt-4 leading-relaxed text-silver/90">
                 {site.geo.primary} та {site.geo.region}.
               </p>
               <p className="mt-2 text-sm leading-relaxed text-silver-dim">
-                {site.geo.note} Виїзд в інші міста — з оплатою відрядження та
-                проживання команди.
+                {site.geo.note}
               </p>
             </div>
           </Reveal>

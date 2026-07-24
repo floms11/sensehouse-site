@@ -26,7 +26,7 @@ const scenarios: Scenario[] = [
   {
     id: "evening",
     label: "Вечір",
-    title: "Будинок створює атмосферу без зайвих дій",
+    title: "Комфортний стан для завершення дня",
     points: [
       "Світло переходить у мʼякий теплий режим",
       "Штори закриваються",
@@ -37,7 +37,7 @@ const scenarios: Scenario[] = [
   {
     id: "away",
     label: "Не вдома",
-    title: "Система пильнує, поки вас немає",
+    title: "Будинок переходить у захищений режим",
     points: [
       "Зайве освітлення вимикається",
       "Клімат переходить в економний режим",
@@ -48,7 +48,7 @@ const scenarios: Scenario[] = [
   {
     id: "return",
     label: "Повернення",
-    title: "Будинок зустрічає вас готовим",
+    title: "Потрібні системи готуються до вашого приїзду",
     points: [
       "Ворота відчиняються назустріч",
       "Вмикається потрібне світло",
@@ -58,8 +58,8 @@ const scenarios: Scenario[] = [
   },
   {
     id: "alert",
-    label: "Аварійна ситуація",
-    title: "Реакція швидша, ніж ви дістанете телефон",
+    label: "Аварія",
+    title: "Система реагує на подію та повідомляє вас",
     points: [
       "Система фіксує протікання",
       "Вода автоматично перекривається",
@@ -119,7 +119,7 @@ function Scene({ s }: { s: SceneState }) {
           style={{
             transform: `scaleX(${0.14 + s.curtains * 0.86})`,
             transformOrigin: "60px 0",
-            transition: "transform 0.9s cubic-bezier(0.22,1,0.36,1)",
+            transition: "transform 0.3s cubic-bezier(0.22,1,0.36,1)",
           }}
         />
         <rect
@@ -133,7 +133,7 @@ function Scene({ s }: { s: SceneState }) {
           style={{
             transform: `scaleX(${0.14 + s.curtains * 0.86})`,
             transformOrigin: "390px 0",
-            transition: "transform 0.9s cubic-bezier(0.22,1,0.36,1)",
+            transition: "transform 0.3s cubic-bezier(0.22,1,0.36,1)",
           }}
         />
       </g>
@@ -223,12 +223,11 @@ export default function ScenarioSwitcher() {
 
   return (
     <div className="mt-12 lg:mt-16">
-      {/* Перемикач */}
       <div
         role="tablist"
         aria-label="Сценарії роботи будинку"
         onKeyDown={onKeyDown}
-        className="flex flex-wrap gap-2"
+        className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap"
       >
         {scenarios.map((s, i) => (
           <button
@@ -242,7 +241,7 @@ export default function ScenarioSwitcher() {
             aria-controls={`${baseId}-panel`}
             tabIndex={i === active ? 0 : -1}
             onClick={() => select(i)}
-            className={`min-h-11 rounded-button px-5 py-2.5 text-[0.92rem] font-medium transition-[background-color,color,border-color] duration-300 ${
+            className={`min-h-12 cursor-pointer rounded-button px-4 py-2.5 text-[0.92rem] font-semibold transition-[background-color,color,border-color] duration-200 sm:px-5 ${
               i === active
                 ? "bg-blue text-navy-deep"
                 : "border border-silver/20 text-silver-dim hover:border-blue/50 hover:text-silver"
@@ -253,14 +252,13 @@ export default function ScenarioSwitcher() {
         ))}
       </div>
 
-      {/* Сцена + опис */}
       <div
         role="tabpanel"
         id={`${baseId}-panel`}
         aria-labelledby={`${baseId}-tab-${current.id}`}
-        className="mt-8 grid items-center gap-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]"
+        className="mt-8 grid items-center gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-12"
       >
-        <div className="overflow-hidden rounded-card border border-silver/10 shadow-card">
+        <div className="overflow-hidden rounded-card border border-silver/10 bg-navy-deep shadow-card">
           <Scene s={current.scene} />
         </div>
 
@@ -268,7 +266,7 @@ export default function ScenarioSwitcher() {
           <h3 className="text-balance text-2xl font-bold tracking-tight text-silver">
             {current.title}
           </h3>
-          <ul className="mt-6 space-y-4" aria-live="polite">
+          <ul className="mt-6 space-y-4" aria-live="polite" aria-atomic="true">
             {current.points.map((point) => (
               <li key={point} className="flex items-start gap-3 text-silver/90">
                 <svg viewBox="0 0 20 20" className="mt-1 size-4 shrink-0 text-blue" aria-hidden="true">
@@ -285,9 +283,9 @@ export default function ScenarioSwitcher() {
               </li>
             ))}
           </ul>
-          <p className="mt-8 text-sm leading-relaxed text-silver-dim">
-            Сценарії налаштовуються під ваш спосіб життя під час
-            пусконалагодження — і змінюються разом із ним.
+          <p className="mt-8 border-l border-gold/60 pl-4 text-sm leading-relaxed text-silver-dim">
+            Остаточна логіка сценаріїв узгоджується під ваш побут і може
+            коригуватися після запуску.
           </p>
         </div>
       </div>

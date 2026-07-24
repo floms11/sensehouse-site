@@ -3,12 +3,12 @@ import SectionHeading from "./SectionHeading";
 
 export default function ScenariosSection() {
   return (
-    <section id="scenarios" className="relative bg-navy-deep/60 py-24 sm:py-32">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8">
+    <section id="scenarios" aria-labelledby="scenarios-title" className="relative py-24 sm:py-32">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <SectionHeading
-          eyebrow="Можливості"
-          title="Як це відчувається в житті"
-          description="Не список функцій, а чотири звичні моменти дня. Оберіть сценарій — і подивіться, як реагує будинок."
+          eyebrow="Сценарії"
+          title={<span id="scenarios-title">Одна дія змінює стан усього будинку</span>}
+          description="Оберіть сценарій і подивіться, як узгоджено реагують світло, клімат, безпека та інші системи."
         />
         <ScenarioSwitcher />
       </div>

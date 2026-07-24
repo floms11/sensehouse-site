@@ -9,7 +9,7 @@
 
 export const site = {
   name: "Sense House",
-  tagline: "Електрика та розумний дім під ключ",
+  tagline: "Електрика та інженерні системи під ключ",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://sense-house.com",
 
   phone: {
@@ -31,11 +31,11 @@ export const site = {
   },
 
   nav: [
-    { href: "#solutions", label: "Рішення" },
-    { href: "#scenarios", label: "Можливості" },
-    { href: "#approach", label: "Підхід" },
-    { href: "#process", label: "Етапи" },
-    { href: "#contact", label: "Контакти" },
+    { href: "/#solutions", label: "Рішення" },
+    { href: "/#process", label: "Як працюємо" },
+    { href: "/#scenarios", label: "Сценарії" },
+    { href: "/#design", label: "Проєктування" },
+    { href: "/#contact", label: "Контакти" },
   ],
 } as const;
 
