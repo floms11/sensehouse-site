@@ -6,15 +6,6 @@ import { trackEvent } from "@/lib/analytics";
 import { isValidUkrainianMobilePhone } from "@/lib/contact-validation";
 import { site } from "@/config/site";
 
-const stages = [
-  "Планування",
-  "Є архітектурний або дизайн-проєкт",
-  "Підготовка до електромонтажу",
-  "Електромонтаж уже розпочато",
-  "Частина робіт виконана",
-  "Будинок введений в експлуатацію",
-];
-
 type Status = "idle" | "loading" | "success" | "error";
 type FieldName = "name" | "phone";
 type FieldErrors = Partial<Record<FieldName, string>>;
@@ -42,8 +33,6 @@ export default function LeadForm() {
     name: "",
     phone: "",
     comment: "",
-    area: "",
-    stage: "",
   });
   const startedRef = useRef(false);
   const successRef = useRef<HTMLDivElement>(null);
@@ -135,8 +124,6 @@ export default function LeadForm() {
           name: values.name.trim(),
           phone: normalizedTelegram(values.phone),
           objectType: "Приватний будинок",
-          area: values.area.trim(),
-          stage: values.stage,
           comment: values.comment.trim(),
           contactMethod: normalizedTelegram(values.phone).startsWith("@")
             ? "Telegram"
@@ -304,64 +291,6 @@ export default function LeadForm() {
           />
         </div>
       </div>
-
-      <details className="mt-5 border-t border-silver/10 pt-4">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 text-sm font-semibold text-silver marker:content-none">
-          Додати площу й етап будівництва
-          <svg
-            viewBox="0 0 20 20"
-            className="size-4 shrink-0 text-blue"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="m5 8 5 5 5-5"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </summary>
-        <div className="mt-4 grid gap-5 sm:grid-cols-2">
-          <div>
-            <label htmlFor="lead-area" className={labelClass}>
-              Площа, м² <span className="font-normal text-silver-dim">(необовʼязково)</span>
-            </label>
-            <input
-              id="lead-area"
-              name="area"
-              type="text"
-              inputMode="numeric"
-              value={values.area}
-              onChange={(event) =>
-                setValue("area", event.currentTarget.value.replace(/\D/g, "").slice(0, 5))
-              }
-              className={inputClass()}
-              placeholder="Наприклад, 180"
-            />
-          </div>
-          <div>
-            <label htmlFor="lead-stage" className={labelClass}>
-              Етап <span className="font-normal text-silver-dim">(необовʼязково)</span>
-            </label>
-            <select
-              id="lead-stage"
-              name="stage"
-              value={values.stage}
-              onChange={(event) => setValue("stage", event.currentTarget.value)}
-              className={`${inputClass()} cursor-pointer`}
-            >
-              <option value="">Оберіть етап</option>
-              {stages.map((stage) => (
-                <option key={stage} value={stage}>
-                  {stage}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </details>
 
       <div className="absolute -left-[9999px]" aria-hidden="true">
         <label htmlFor="lead-company">

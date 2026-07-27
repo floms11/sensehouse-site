@@ -9,7 +9,7 @@ export default function Footer() {
   return (
     <footer className="border-t border-silver/10 bg-navy-deep py-14">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr]">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.65fr_1.2fr_1fr_1fr]">
           <div>
             <Logo idPrefix="sh-ftr" />
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-silver-dim">
@@ -20,6 +20,24 @@ export default function Footer() {
               {site.geo.primary} та {site.geo.region}. {site.geo.note}
             </p>
           </div>
+
+          <nav aria-label="Послуги">
+            <h3 className="text-[0.75rem] font-semibold tracking-[0.18em] text-silver-dim uppercase">
+              Послуги
+            </h3>
+            <ul className="mt-4 space-y-2.5">
+              {site.servicePages.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="inline-flex min-h-11 items-center text-sm leading-relaxed text-silver/85 transition-colors hover:text-blue-soft"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
           <nav aria-label="Навігація у футері">
             <h3 className="text-[0.75rem] font-semibold tracking-[0.18em] text-silver-dim uppercase">

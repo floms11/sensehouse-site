@@ -24,6 +24,8 @@ npm start
 ## Структура
 
 - `/` — головна: hero, рішення, процес, сценарії, проєктування, контакти;
+- `/posluhy/elektromontazh-kropyvnytskyi` — електромонтаж і послуги електрика;
+- `/posluhy/rozumnyi-dim-kropyvnytskyi` — розумний дім та автоматизація;
 - `/privacy` — політика конфіденційності;
 - `/api/lead` — серверний прийом заявок;
 - `robots.txt`, `sitemap.xml`, Open Graph і JSON-LD генеруються Next.js.
@@ -31,7 +33,7 @@ npm start
 ## Форма заявок
 
 Обовʼязкові поля: імʼя та український мобільний номер або Telegram. Короткий
-опис обʼєкта, площа й етап будівництва необовʼязкові.
+опис обʼєкта необовʼязковий.
 
 Форма має клієнтську та серверну валідацію, honeypot, rate limit, обмеження
 формату й розміру запиту, блокування повторного надсилання та збереження
@@ -55,11 +57,13 @@ Meta Pixel підключаються тільки за наявності ре�
 
 ## SEO
 
-Title, description, canonical і Open Graph налаштовані в
-`src/app/layout.tsx`. `WebSite`, `Organization` і `Service` JSON-LD
-додаються лише на головній сторінці. Канонічний домен зафіксований у
-`src/config/site.ts`, щоб preview- або origin-адреса не потрапила до
-canonical, sitemap чи соціальних превʼю.
+Title, description, canonical і Open Graph налаштовані через Metadata API.
+Головна містить `WebSite`, `Organization` і `Service` JSON-LD, а сторінки
+послуг — власні `Service` та `BreadcrumbList`. Канонічний домен зафіксований
+у `src/config/site.ts`, щоб preview- або origin-адреса не потрапила до
+canonical, sitemap чи соціальних превʼю. Видимий контент природно покриває
+локальні наміри: електромонтаж, електрик, розумний дім і автоматизація у
+Кропивницькому.
 
 ## Контент і матеріали
 

@@ -34,6 +34,23 @@ function canonical(html) {
   )?.href;
 }
 
+function mainText(html) {
+  return mainHtml(html)
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function mainHtml(html) {
+  return html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] ?? "";
+}
+
+function footerHtml(html) {
+  return html.match(/<footer\b[^>]*>([\s\S]*?)<\/footer>/i)?.[1] ?? "";
+}
+
 async function read(pathname) {
   const response = await fetch(new URL(pathname, auditBaseUrl), {
     redirect: "manual",
@@ -74,6 +91,10 @@ check(
   !metaContent(home.text, "name", "keywords"),
   "Застарілий meta keywords не видалено",
 );
+check(
+  !/(?<!\p{L})електрик(?!\p{L})/iu.test(mainText(home.text)),
+  "На головній у видимому тексті використано слово «електрик»",
+);
 
 const jsonLdBlocks = Array.from(
   home.text.matchAll(
@@ -86,6 +107,91 @@ const graphTypes = jsonLdBlocks.flatMap((block) =>
 );
 for (const type of ["WebSite", "Organization", "Service"]) {
   check(graphTypes.includes(type), `У JSON-LD відсутній тип ${type}`);
+}
+
+const servicePages = [
+  {
+    path: "/posluhy/elektromontazh-kropyvnytskyi",
+    terms: ["електромонтаж", "електрик", "Кропивницьк"],
+  },
+  {
+    path: "/posluhy/rozumnyi-dim-kropyvnytskyi",
+    terms: ["розумний дім", "розумний будинок", "автоматизац", "Кропивницьк"],
+  },
+];
+
+check(
+  !/<a\b[^>]*href=["']\/posluhy\//i.test(mainHtml(home.text)),
+  "Посилання на SEO-сторінки мають бути відсутні в основному контенті головної",
+);
+for (const servicePage of servicePages) {
+  check(
+    footerHtml(home.text).includes(`href="${servicePage.path}"`),
+    `У футері головної немає посилання ${servicePage.path}`,
+  );
+}
+
+for (const servicePage of servicePages) {
+  const page = await read(servicePage.path);
+  const expectedCanonical = `${canonicalOrigin}${servicePage.path}`;
+
+  check(
+    page.response.status === 200,
+    `${servicePage.path} повернула ${page.response.status}`,
+  );
+  check(
+    canonical(page.text) === expectedCanonical,
+    `Некоректний canonical ${servicePage.path}`,
+  );
+  check(
+    metaContent(page.text, "property", "og:url") === expectedCanonical,
+    `Некоректний og:url ${servicePage.path}`,
+  );
+  check(
+    (page.text.match(/<h1\b/gi) ?? []).length === 1,
+    `На ${servicePage.path} має бути рівно один H1`,
+  );
+  check(
+    !metaContent(page.text, "name", "keywords"),
+    `${servicePage.path} містить застарілий meta keywords`,
+  );
+  check(
+    !/(?<!\p{L})електрик(?!\p{L})/iu.test(mainText(page.text)),
+    `${servicePage.path} містить слово «електрик» у видимому тексті`,
+  );
+  check(
+    !/<a\b[^>]*href=["']\/posluhy\//i.test(mainHtml(page.text)),
+    `${servicePage.path} містить навігацію на SEO-сторінки поза футером`,
+  );
+  for (const linkedPage of servicePages) {
+    check(
+      footerHtml(page.text).includes(`href="${linkedPage.path}"`),
+      `У футері ${servicePage.path} немає посилання ${linkedPage.path}`,
+    );
+  }
+
+  const normalizedHtml = page.text.toLocaleLowerCase("uk");
+  for (const term of servicePage.terms) {
+    check(
+      normalizedHtml.includes(term.toLocaleLowerCase("uk")),
+      `${servicePage.path} не містить цільовий термін «${term}»`,
+    );
+  }
+
+  const serviceJsonLd = Array.from(
+    page.text.matchAll(
+      /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
+    ),
+    (match) => JSON.parse(match[1]),
+  ).flatMap((block) => block["@graph"] ?? [block]);
+  check(
+    serviceJsonLd.some((node) => node["@type"] === "Service"),
+    `${servicePage.path} не містить Service JSON-LD`,
+  );
+  check(
+    serviceJsonLd.some((node) => node["@type"] === "BreadcrumbList"),
+    `${servicePage.path} не містить BreadcrumbList JSON-LD`,
+  );
 }
 
 const robots = await read("/robots.txt");
@@ -102,6 +208,14 @@ check(
   sitemap.text.includes(`<loc>${canonicalOrigin}</loc>`),
   "У sitemap немає canonical URL головної",
 );
+for (const servicePage of servicePages) {
+  check(
+    sitemap.text.includes(
+      `<loc>${canonicalOrigin}${servicePage.path}</loc>`,
+    ),
+    `У sitemap немає ${servicePage.path}`,
+  );
+}
 check(
   !/(?:localhost|127\.0\.0\.1|192\.168\.|<priority>|<changefreq>|<lastmod>)/i.test(
     sitemap.text,

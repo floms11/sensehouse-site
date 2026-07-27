@@ -1,4 +1,5 @@
 import { site } from "@/config/site";
+import type { ServicePage } from "@/lib/service-pages";
 
 const organizationId = `${site.url}/#organization`;
 const websiteId = `${site.url}/#website`;
@@ -63,9 +64,11 @@ export const homeStructuredData = {
       "@id": serviceId,
       name: site.tagline,
       serviceType: [
-        "Електрика під ключ",
+        "Електромонтаж під ключ",
+        "Послуги електрика",
         "Технічне проєктування",
         "Розумний дім",
+        "Автоматизація будинку",
         "Резервне живлення",
         "Мережа та відеоспостереження",
       ],
@@ -80,3 +83,54 @@ export const homeStructuredData = {
     },
   ],
 } as const;
+
+export function createServiceStructuredData(page: ServicePage) {
+  const pageUrl = `${site.url}/posluhy/${page.slug}`;
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${pageUrl}/#breadcrumbs`,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Головна",
+            item: site.url,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: page.title,
+            item: pageUrl,
+          },
+        ],
+      },
+      {
+        "@type": "Organization",
+        "@id": organizationId,
+        name: site.name,
+        url: site.url,
+        logo: `${site.url}/icon.svg`,
+        telephone: site.phone.e164,
+        sameAs: [site.social.instagram, site.social.telegram].filter(Boolean),
+      },
+      {
+        "@type": "Service",
+        "@id": `${pageUrl}/#service`,
+        url: pageUrl,
+        name: page.title,
+        serviceType: page.serviceTypes,
+        description: page.metaDescription,
+        provider: { "@id": organizationId },
+        areaServed,
+        audience: {
+          "@type": "Audience",
+          audienceType: "Власники приватних будинків",
+        },
+      },
+    ],
+  } as const;
+}

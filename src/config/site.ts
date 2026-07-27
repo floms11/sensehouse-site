@@ -45,6 +45,17 @@ export const site = {
     { href: "/#design", label: "Проєктування" },
     { href: "/#contact", label: "Контакти" },
   ],
+
+  servicePages: [
+    {
+      href: "/posluhy/elektromontazh-kropyvnytskyi",
+      label: "Електромонтаж",
+    },
+    {
+      href: "/posluhy/rozumnyi-dim-kropyvnytskyi",
+      label: "Розумний дім та автоматизація",
+    },
+  ],
 } as const;
 
 export type Site = typeof site;
