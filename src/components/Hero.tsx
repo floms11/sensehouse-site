@@ -29,9 +29,12 @@ export default function Hero() {
           </h1>
 
           <p className="mt-6 max-w-xl text-base leading-relaxed text-silver-dim sm:text-lg">
-            Проєктуємо, монтуємо й запускаємо електрику та розумний дім:
-            електрощити, освітлення, клімат, безпеку, резервне живлення й
-            мережу — з єдиною логікою керування та технічною документацією.
+            Проєктуємо та монтуємо інженерні системи для будинків, квартир і
+            бізнесу:
+            електрику, освітлення, резервне живлення, мережі, безпеку й
+            автоматизацію. Можемо виконати весь комплекс робіт або долучитися
+            на окремому етапі. Усе фіксуємо в технічній документації, щоб
+            результат був зрозумілим і передбачуваним.
           </p>
 
           <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -39,11 +42,26 @@ export default function Hero() {
               Обговорити проєкт
             </CTAButton>
             <CTAButton
-              href="#process"
+              href={`tel:${site.phone.e164}`}
               variant="ghost"
               size="lg"
+              event="phone_click"
+              eventParams={{ placement: "hero" }}
             >
-              Дізнатися, як ми працюємо
+              <svg
+                viewBox="0 0 24 24"
+                className="size-5"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Зателефонувати
             </CTAButton>
           </div>
 

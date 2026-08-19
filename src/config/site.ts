@@ -40,11 +40,16 @@ export const site = {
 
   nav: [
     { href: "/#solutions", label: "Рішення" },
+    { href: "/dlia-biznesu", label: "Для бізнесу" },
     { href: "/#process", label: "Як працюємо" },
-    { href: "/#scenarios", label: "Сценарії" },
     { href: "/#design", label: "Проєктування" },
     { href: "/#contact", label: "Контакти" },
   ],
+
+  businessPage: {
+    href: "/dlia-biznesu",
+    label: "Інженерні системи для бізнесу",
+  },
 
   servicePages: [
     {
@@ -52,8 +57,28 @@ export const site = {
       label: "Електромонтаж",
     },
     {
+      href: "/posluhy/zamina-provodky-kropyvnytskyi",
+      label: "Заміна проводки",
+    },
+    {
+      href: "/posluhy/proektuvannia-elektryky-kropyvnytskyi",
+      label: "Проєктування електрики",
+    },
+    {
+      href: "/posluhy/elektroshchyty-kropyvnytskyi",
+      label: "Електрощити",
+    },
+    {
       href: "/posluhy/rozumnyi-dim-kropyvnytskyi",
       label: "Розумний дім та автоматизація",
+    },
+    {
+      href: "/posluhy/rezervne-zhyvlennia-kropyvnytskyi",
+      label: "Резервне живлення",
+    },
+    {
+      href: "/posluhy/merezha-ta-videosposterezhennia-kropyvnytskyi",
+      label: "Мережа та відеоспостереження",
     },
   ],
 } as const;

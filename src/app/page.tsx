@@ -1,7 +1,8 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import SystemsSection from "@/components/SystemsSection";
-import ScenariosSection from "@/components/ScenariosSection";
+import BusinessCallout from "@/components/BusinessCallout";
+import EngineeringLayersSection from "@/components/EngineeringLayersSection";
 import ApproachSection from "@/components/ApproachSection";
 import ProcessTimeline from "@/components/ProcessTimeline";
 import FinalCTA from "@/components/FinalCTA";
@@ -17,8 +18,9 @@ export default function Home() {
       <main id="main" className="flex-1">
         <Hero />
         <SystemsSection />
+        <BusinessCallout />
+        <EngineeringLayersSection />
         <ProcessTimeline />
-        <ScenariosSection />
         <ApproachSection />
         <FinalCTA />
       </main>

@@ -112,17 +112,48 @@ for (const type of ["WebSite", "Organization", "Service"]) {
 const servicePages = [
   {
     path: "/posluhy/elektromontazh-kropyvnytskyi",
-    terms: ["електромонтаж", "електрик", "Кропивницьк"],
+    terms: ["електромонтаж", "електрик", "квартир", "Кропивницьк"],
+  },
+  {
+    path: "/posluhy/zamina-provodky-kropyvnytskyi",
+    terms: ["заміна", "проводк", "квартир", "Кропивницьк"],
+    // Немає власної картки на головній — доступна з футера та суміжних послуг
+    homeCard: false,
+  },
+  {
+    path: "/posluhy/proektuvannia-elektryky-kropyvnytskyi",
+    terms: ["проєктування електрики", "Кропивницьк"],
+  },
+  {
+    path: "/posluhy/elektroshchyty-kropyvnytskyi",
+    terms: ["електрощит", "Кропивницьк"],
   },
   {
     path: "/posluhy/rozumnyi-dim-kropyvnytskyi",
     terms: ["розумний дім", "розумний будинок", "автоматизац", "Кропивницьк"],
   },
+  {
+    path: "/posluhy/rezervne-zhyvlennia-kropyvnytskyi",
+    terms: ["резервне живлення", "Кропивницьк"],
+  },
+  {
+    path: "/posluhy/merezha-ta-videosposterezhennia-kropyvnytskyi",
+    terms: ["мереж", "відеоспостереження", "Кропивницьк"],
+  },
 ];
+const businessPath = "/dlia-biznesu";
 
+// Картки секції «Рішення» ведуть на сторінки послуг просто з головної.
+for (const servicePage of servicePages) {
+  if (servicePage.homeCard === false) continue;
+  check(
+    mainHtml(home.text).includes(`href="${servicePage.path}"`),
+    `У секції рішень головної немає посилання ${servicePage.path}`,
+  );
+}
 check(
-  !/<a\b[^>]*href=["']\/posluhy\//i.test(mainHtml(home.text)),
-  "Посилання на SEO-сторінки мають бути відсутні в основному контенті головної",
+  mainHtml(home.text).includes(`href="${businessPath}"`),
+  `На головній немає переходу на ${businessPath}`,
 );
 for (const servicePage of servicePages) {
   check(
@@ -159,10 +190,6 @@ for (const servicePage of servicePages) {
     !/(?<!\p{L})електрик(?!\p{L})/iu.test(mainText(page.text)),
     `${servicePage.path} містить слово «електрик» у видимому тексті`,
   );
-  check(
-    !/<a\b[^>]*href=["']\/posluhy\//i.test(mainHtml(page.text)),
-    `${servicePage.path} містить навігацію на SEO-сторінки поза футером`,
-  );
   for (const linkedPage of servicePages) {
     check(
       footerHtml(page.text).includes(`href="${linkedPage.path}"`),
@@ -194,6 +221,56 @@ for (const servicePage of servicePages) {
   );
 }
 
+const business = await read(businessPath);
+const businessCanonical = `${canonicalOrigin}${businessPath}`;
+check(
+  business.response.status === 200,
+  `${businessPath} повернула ${business.response.status}`,
+);
+check(
+  canonical(business.text) === businessCanonical,
+  `Некоректний canonical ${businessPath}`,
+);
+check(
+  metaContent(business.text, "property", "og:url") === businessCanonical,
+  `Некоректний og:url ${businessPath}`,
+);
+check(
+  (business.text.match(/<h1\b/gi) ?? []).length === 1,
+  `На ${businessPath} має бути рівно один H1`,
+);
+check(
+  !/(?<!\p{L})електрик(?!\p{L})/iu.test(mainText(business.text)),
+  `${businessPath} містить слово «електрик» у видимому тексті`,
+);
+const businessNormalizedHtml = business.text.toLocaleLowerCase("uk");
+for (const term of ["для бізнесу", "кропивницьк"]) {
+  check(
+    businessNormalizedHtml.includes(term),
+    `${businessPath} не містить цільовий термін «${term}»`,
+  );
+}
+for (const servicePage of servicePages) {
+  check(
+    mainHtml(business.text).includes(`href="${servicePage.path}"`),
+    `${businessPath} не посилається на ${servicePage.path}`,
+  );
+}
+const businessJsonLd = Array.from(
+  business.text.matchAll(
+    /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
+  ),
+  (match) => JSON.parse(match[1]),
+).flatMap((block) => block["@graph"] ?? [block]);
+check(
+  businessJsonLd.some((node) => node["@type"] === "Service"),
+  `${businessPath} не містить Service JSON-LD`,
+);
+check(
+  businessJsonLd.some((node) => node["@type"] === "BreadcrumbList"),
+  `${businessPath} не містить BreadcrumbList JSON-LD`,
+);
+
 const robots = await read("/robots.txt");
 check(robots.response.status === 200, `robots.txt повернув ${robots.response.status}`);
 check(
@@ -216,6 +293,10 @@ for (const servicePage of servicePages) {
     `У sitemap немає ${servicePage.path}`,
   );
 }
+check(
+  sitemap.text.includes(`<loc>${canonicalOrigin}${businessPath}</loc>`),
+  `У sitemap немає ${businessPath}`,
+);
 check(
   !/(?:localhost|127\.0\.0\.1|192\.168\.|<priority>|<changefreq>|<lastmod>)/i.test(
     sitemap.text,

@@ -6,6 +6,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: site.url,
     },
+    {
+      url: new URL(site.businessPage.href, site.url).toString(),
+    },
     ...site.servicePages.map((page) => ({
       url: new URL(page.href, site.url).toString(),
     })),

@@ -1,14 +1,32 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import type { ServicePage } from "@/lib/service-pages";
+import { getServicePage } from "@/lib/service-pages";
 import CTAButton from "./CTAButton";
+import FinalCTA from "./FinalCTA";
 import Footer from "./Footer";
 import Header from "./Header";
 import Reveal from "./Reveal";
 import { site } from "@/config/site";
 import { createServiceStructuredData } from "@/lib/structured-data";
 
-export default function ServiceLandingPage({ page }: { page: ServicePage }) {
+type ServiceLandingPageProps = {
+  page: ServicePage;
+  /**
+   * Додатковий блок (наприклад, сценарії на сторінці розумного дому),
+   * що розміщується після пояснення підходу та перед відповідями.
+   */
+  extraSection?: ReactNode;
+};
+
+export default function ServiceLandingPage({
+  page,
+  extraSection,
+}: ServiceLandingPageProps) {
   const jsonLd = createServiceStructuredData(page);
+  const relatedPages = page.related
+    .map((slug) => getServicePage(slug))
+    .filter((related): related is ServicePage => Boolean(related));
 
   return (
     <>
@@ -58,25 +76,87 @@ export default function ServiceLandingPage({ page }: { page: ServicePage }) {
 
               <div className="mt-10 flex flex-col gap-3 sm:flex-row">
                 <CTAButton
-                  href="/#contact"
+                  href="#contact"
                   size="lg"
                   event="hero_cta_click"
                   eventParams={{ placement: `service_${page.slug}` }}
                 >
-                  Обговорити обʼєкт
+                  Обговорити проєкт
                 </CTAButton>
-                <CTAButton href={`tel:${site.phone.e164}`} variant="ghost" size="lg">
-                  {site.phone.display}
+                <CTAButton
+                  href={`tel:${site.phone.e164}`}
+                  variant="ghost"
+                  size="lg"
+                  event="phone_click"
+                  eventParams={{ placement: `service_${page.slug}` }}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="size-5"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Зателефонувати
                 </CTAButton>
               </div>
             </div>
           </section>
 
           <section
-            aria-labelledby="service-scope-title"
+            aria-labelledby="service-fit-title"
             className="relative py-24 sm:py-32"
           >
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
+              <Reveal className="max-w-3xl">
+                <p className="text-[0.76rem] font-semibold tracking-[0.18em] text-blue uppercase">
+                  Кому підходить
+                </p>
+                <h2
+                  id="service-fit-title"
+                  className="mt-4 text-balance text-3xl leading-[1.12] font-bold tracking-tight text-silver sm:text-4xl"
+                >
+                  {page.fitTitle}
+                </h2>
+                <p className="mt-5 text-base leading-relaxed text-silver-dim sm:text-lg">
+                  {page.fitDescription}
+                </p>
+              </Reveal>
+
+              <div className="mt-14 grid gap-px overflow-hidden rounded-card border border-silver/10 bg-silver/10 sm:grid-cols-2">
+                {page.fit.map((item, index) => (
+                  <Reveal
+                    key={item.title}
+                    delay={(index % 2) * 70}
+                    className="bg-navy-deep p-7 sm:p-8"
+                  >
+                    <h3 className="text-lg font-bold tracking-tight text-silver">
+                      {item.title}
+                    </h3>
+                    <p className="mt-3 text-[0.94rem] leading-relaxed text-silver-dim">
+                      {item.text}
+                    </p>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section
+            aria-labelledby="service-scope-title"
+            className="relative overflow-hidden bg-navy-deep/55 py-24 sm:py-32"
+          >
+            <div
+              aria-hidden="true"
+              className="blueprint-grid absolute inset-0 opacity-50"
+            />
+            <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
               <Reveal className="max-w-3xl">
                 <p className="text-[0.76rem] font-semibold tracking-[0.18em] text-blue uppercase">
                   Склад рішення
@@ -118,14 +198,43 @@ export default function ServiceLandingPage({ page }: { page: ServicePage }) {
           </section>
 
           <section
-            aria-labelledby="service-approach-title"
+            aria-labelledby="service-outcomes-title"
             className="blueprint-grid--light blueprint-grid relative bg-silver py-24 text-navy sm:py-32"
           >
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
-              <div className="grid gap-12 lg:grid-cols-[minmax(0,.8fr)_minmax(0,1.2fr)] lg:gap-20">
+              <Reveal className="max-w-2xl">
+                <p className="text-[0.76rem] font-semibold tracking-[0.18em] text-navy/60 uppercase">
+                  Результат
+                </p>
+                <h2
+                  id="service-outcomes-title"
+                  className="mt-4 text-balance text-3xl leading-[1.12] font-bold tracking-tight text-navy sm:text-4xl"
+                >
+                  Що ви отримуєте в результаті
+                </h2>
+              </Reveal>
+
+              <div className="mt-12 grid gap-x-10 gap-y-8 sm:grid-cols-2">
+                {page.outcomes.map((item, index) => (
+                  <Reveal
+                    key={item.title}
+                    delay={(index % 2) * 70}
+                    className="border-l border-blue/50 pl-5"
+                  >
+                    <h3 className="text-lg font-bold tracking-tight text-navy">
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 text-[0.94rem] leading-relaxed text-navy/68">
+                      {item.text}
+                    </p>
+                  </Reveal>
+                ))}
+              </div>
+
+              <div className="mt-20 grid gap-12 border-t border-navy/12 pt-16 lg:grid-cols-[minmax(0,.8fr)_minmax(0,1.2fr)] lg:gap-20">
                 <Reveal>
                   <p className="text-[0.76rem] font-semibold tracking-[0.18em] text-navy/60 uppercase">
-                    Підхід
+                    Як проходить робота
                   </p>
                   <h2
                     id="service-approach-title"
@@ -162,6 +271,8 @@ export default function ServiceLandingPage({ page }: { page: ServicePage }) {
             </div>
           </section>
 
+          {extraSection}
+
           <section
             aria-labelledby="service-answers-title"
             className="relative py-24 sm:py-32"
@@ -196,24 +307,46 @@ export default function ServiceLandingPage({ page }: { page: ServicePage }) {
                 ))}
               </div>
 
-              <Reveal className="mt-16 flex flex-col gap-6 border-t border-silver/10 pt-10 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold tracking-tight text-silver">
-                    Обговорімо ваш будинок і майбутні системи
+              {relatedPages.length > 0 && (
+                <Reveal className="mt-16 border-t border-silver/10 pt-10">
+                  <h2 className="text-[0.76rem] font-semibold tracking-[0.18em] text-blue uppercase">
+                    Суміжні послуги
                   </h2>
-                  <p className="mt-2 max-w-2xl leading-relaxed text-silver-dim">
-                    Коротко опишіть обʼєкт, етап робіт і бажаний результат.
-                    Визначимо, які вихідні дані потрібні та з чого варто почати.
-                  </p>
-                </div>
-                <CTAButton href="/#contact" size="lg">
-                  Залишити заявку
-                </CTAButton>
-              </Reveal>
-
+                  <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {relatedPages.map((related) => (
+                      <li key={related.slug}>
+                        <Link
+                          href={`/posluhy/${related.slug}`}
+                          className="group flex min-h-14 items-center justify-between gap-4 rounded-button border border-silver/15 px-5 py-4 transition-colors hover:border-blue/60"
+                        >
+                          <span className="font-semibold text-silver transition-colors group-hover:text-blue-soft">
+                            {related.eyebrow}
+                          </span>
+                          <svg
+                            viewBox="0 0 20 20"
+                            className="size-4 shrink-0 text-blue transition-transform duration-200 group-hover:translate-x-1"
+                            fill="none"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M4 10h12m-5-5 5 5-5 5"
+                              stroke="currentColor"
+                              strokeWidth="1.6"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </Reveal>
+              )}
             </div>
           </section>
         </article>
+
+        <FinalCTA />
       </main>
       <Footer />
       <script

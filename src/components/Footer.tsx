@@ -14,7 +14,7 @@ export default function Footer() {
             <Logo idPrefix="sh-ftr" />
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-silver-dim">
               Проєктування та реалізація електрики й інженерних систем для
-              приватних будинків.
+              приватних будинків, квартир і бізнесу.
             </p>
             <p className="mt-4 text-sm text-silver-dim">
               {site.geo.primary} та {site.geo.region}. {site.geo.note}

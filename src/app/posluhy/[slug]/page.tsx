@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import ScenariosSection from "@/components/ScenariosSection";
 import ServiceLandingPage from "@/components/ServiceLandingPage";
 import { site } from "@/config/site";
 import { getServicePage, servicePages } from "@/lib/service-pages";
@@ -57,5 +58,10 @@ export default async function ServicePageRoute({ params }: PageProps) {
   const page = getServicePage(slug);
   if (!page) notFound();
 
-  return <ServiceLandingPage page={page} />;
+  // Інтерактивні сценарії живуть на сторінці розумного дому:
+  // після пояснення автоматизації та перед фінальним CTA.
+  const extraSection =
+    page.slug === "rozumnyi-dim-kropyvnytskyi" ? <ScenariosSection /> : undefined;
+
+  return <ServiceLandingPage page={page} extraSection={extraSection} />;
 }

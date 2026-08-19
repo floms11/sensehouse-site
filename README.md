@@ -1,8 +1,8 @@
 # Sense House — production landing
 
 Сайт компанії **Sense House**: проєктування та реалізація електрики й
-інженерних систем для приватних будинків у Кропивницькому та Кіровоградській
-області.
+інженерних систем для приватних будинків і бізнесу у Кропивницькому та
+Кіровоградській області.
 
 Стек: **Next.js App Router + TypeScript + Tailwind CSS 4**. Головна сторінка
 статична; JavaScript використовується лише для навігації, сценаріїв,
@@ -23,12 +23,25 @@ npm start
 
 ## Структура
 
-- `/` — головна: hero, рішення, процес, сценарії, проєктування, контакти;
+- `/` — головна: hero, рішення, перехід для бізнесу, інженерна система
+  обʼєкта, процес, проєктування, контакти;
+- `/dlia-biznesu` — інженерні системи для комерційних просторів;
 - `/posluhy/elektromontazh-kropyvnytskyi` — електромонтаж і послуги електрика;
-- `/posluhy/rozumnyi-dim-kropyvnytskyi` — розумний дім та автоматизація;
+- `/posluhy/zamina-provodky-kropyvnytskyi` — заміна та модернізація електрики
+  у квартирах і будинках;
+- `/posluhy/proektuvannia-elektryky-kropyvnytskyi` — технічне проєктування;
+- `/posluhy/elektroshchyty-kropyvnytskyi` — електрощити;
+- `/posluhy/rozumnyi-dim-kropyvnytskyi` — розумний дім та автоматизація
+  (тут живуть інтерактивні сценарії);
+- `/posluhy/rezervne-zhyvlennia-kropyvnytskyi` — резервне живлення;
+- `/posluhy/merezha-ta-videosposterezhennia-kropyvnytskyi` — мережа та
+  відеоспостереження;
 - `/privacy` — політика конфіденційності;
 - `/api/lead` — серверний прийом заявок;
 - `robots.txt`, `sitemap.xml`, Open Graph і JSON-LD генеруються Next.js.
+
+Дані сторінок послуг зберігаються в `src/lib/service-pages.ts` і рендеряться
+спільним шаблоном `src/components/ServiceLandingPage.tsx`.
 
 ## Форма заявок
 
