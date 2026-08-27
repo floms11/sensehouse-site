@@ -64,9 +64,39 @@ npm start
 
 ## Аналітика
 
-Події надсилаються лише через `trackEvent` із `src/lib/analytics.ts`. GA4 і
-Meta Pixel підключаються тільки за наявності реальних
-`NEXT_PUBLIC_GA_ID` / `NEXT_PUBLIC_META_PIXEL_ID`.
+Уся аналітика живе в `src/lib/analytics.ts`; події надсилаються лише через
+`trackEvent`. GA4 і Meta Pixel підключаються тільки за наявності реальних
+`NEXT_PUBLIC_GA_ID` / `NEXT_PUBLIC_META_PIXEL_ID` (це build-time змінні —
+задавайте їх у середовищі production-збірки та перезбирайте сайт).
+
+**Перегляди сторінок.** `gtag('config')` викликається з
+`send_page_view: false`; один `page_view` (GA4) та `PageView` (Meta) на
+кожен перегляд — перше завантаження і переходи App Router — надсилає
+`<AnalyticsPageViews />`. Щоб уникнути дублювання, у налаштуваннях потоку
+GA4 вимкніть у Enhanced Measurement пункт «Page changes based on browser
+history events» (Зміни сторінки на основі подій історії браузера).
+
+**Події** (усі йдуть у GA4 як custom events та в Meta як `trackCustom`):
+`hero_cta_click`, `header_cta_click`, `phone_click`, `instagram_click`,
+`telegram_click`, `form_start`, `form_submit`, `form_submit_success`,
+`form_submit_error`, `scenario_change`, `project_page_change`,
+`project_sheet_open`, `process_section_view`, `final_cta_view`.
+
+**Конверсії.**
+
+- `form_submit_success` — основна конверсія. Викликається лише після
+  успішної відповіді `/api/lead`; додатково надсилає стандартну подію
+  Meta **Lead** (один раз, не спрацьовує при помилці форми чи кліку).
+- `phone_click`, `telegram_click` — допоміжні конверсії.
+- У GA4 позначте ці події як ключові (Admin → Events → Mark as key
+  event); Google Ads імпортує конверсії з GA4 — окремий Ads-тег на сайті
+  не потрібен і не додається.
+
+**Перевірка.** GA4: DebugView (Admin → DebugView) показує події з
+локальної збірки, якщо відкрити сайт із розширенням Google Analytics
+Debugger або додати `?gtm_debug=x`; має бути один `page_view` на перегляд.
+Meta: Events Manager → Test Events — введіть адресу сайту та перевірте
+`PageView` на переходах і одиничний `Lead` після успішної заявки.
 
 ## SEO
 
