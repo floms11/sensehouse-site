@@ -81,7 +81,7 @@ export default function ServiceLandingPage({
                   event="hero_cta_click"
                   eventParams={{ placement: `service_${page.slug}` }}
                 >
-                  Обговорити проєкт
+                  Проконсультуватися
                 </CTAButton>
                 <CTAButton
                   href={`tel:${site.phone.e164}`}

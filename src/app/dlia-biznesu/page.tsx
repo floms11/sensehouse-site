@@ -174,7 +174,7 @@ export default function BusinessPage() {
                   event="hero_cta_click"
                   eventParams={{ placement: "business_hero" }}
                 >
-                  Обговорити проєкт
+                  Проконсультуватися
                 </CTAButton>
                 <CTAButton
                   href={`tel:${site.phone.e164}`}

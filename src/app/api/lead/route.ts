@@ -87,13 +87,15 @@ export async function POST(request: Request) {
     name.length < 2 ||
     name.length > 200 ||
     !isValidContact(phone) ||
+    objectType.length < 2 ||
+    objectType.length > 100 ||
     comment.length > 2000 ||
     (area && !/^\d{1,5}$/.test(area))
   ) {
     return NextResponse.json(
       {
         message:
-          "Перевірте імʼя, контакт і формат необовʼязкової площі.",
+          "Перевірте імʼя, контакт, тип обʼєкта і формат необовʼязкової площі.",
       },
       { status: 422 },
     );

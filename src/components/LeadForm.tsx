@@ -7,7 +7,7 @@ import { isValidUkrainianMobilePhone } from "@/lib/contact-validation";
 import { site } from "@/config/site";
 
 type Status = "idle" | "loading" | "success" | "error";
-type FieldName = "name" | "phone";
+type FieldName = "name" | "phone" | "objectType";
 type FieldErrors = Partial<Record<FieldName, string>>;
 
 function normalizedTelegram(value: string): string {
@@ -32,6 +32,7 @@ export default function LeadForm() {
   const [values, setValues] = useState({
     name: "",
     phone: "",
+    objectType: "",
     comment: "",
   });
   const startedRef = useRef(false);
@@ -79,7 +80,7 @@ export default function LeadForm() {
 
   const setValue = (field: keyof typeof values, value: string) => {
     setValues((current) => ({ ...current, [field]: value }));
-    if (field === "name" || field === "phone") {
+    if (field === "name" || field === "phone" || field === "objectType") {
       setErrors((current) => ({ ...current, [field]: undefined }));
     }
   };
@@ -93,6 +94,9 @@ export default function LeadForm() {
       nextErrors.phone =
         "Вкажіть український мобільний номер або Telegram у форматі @username.";
     }
+    if (!values.objectType) {
+      nextErrors.objectType = "Оберіть тип обʼєкта.";
+    }
     return nextErrors;
   };
 
@@ -103,7 +107,7 @@ export default function LeadForm() {
     const nextErrors = validate();
     setErrors(nextErrors);
 
-    const firstError = (["name", "phone"] as const).find(
+    const firstError = (["name", "phone", "objectType"] as const).find(
       (field) => nextErrors[field],
     );
     if (firstError) {
@@ -114,7 +118,7 @@ export default function LeadForm() {
     const formData = new FormData(event.currentTarget);
     setStatus("loading");
     setServerMessage("");
-    trackEvent("form_submit");
+    trackEvent("form_submit", { object_type: values.objectType });
 
     try {
       const response = await fetch("/api/lead", {
@@ -123,7 +127,7 @@ export default function LeadForm() {
         body: JSON.stringify({
           name: values.name.trim(),
           phone: normalizedTelegram(values.phone),
-          objectType: "Приватний будинок",
+          objectType: values.objectType,
           comment: values.comment.trim(),
           contactMethod: normalizedTelegram(values.phone).startsWith("@")
             ? "Telegram"
@@ -273,6 +277,72 @@ export default function LeadForm() {
           )}
         </div>
 
+        <fieldset
+          className="sm:col-span-2"
+          aria-invalid={errors.objectType ? true : undefined}
+          aria-describedby={
+            errors.objectType ? "lead-objectType-error" : undefined
+          }
+        >
+          <legend className={labelClass}>
+            Тип обʼєкта <span className="text-blue">*</span>
+          </legend>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            {[
+              { value: "Квартира", label: "Квартира" },
+              { value: "Приватний будинок", label: "Будинок" },
+              {
+                value: "Бізнес / комерційний обʼєкт",
+                label: "Бізнес",
+              },
+            ].map((option) => {
+              const selected = values.objectType === option.value;
+
+              return (
+                <label
+                  key={option.value}
+                  className={`flex min-h-13 cursor-pointer items-center justify-center rounded-xl border px-4 py-3 text-center text-sm font-semibold transition-[border-color,background-color,color,box-shadow] duration-200 focus-within:ring-3 focus-within:ring-blue/15 ${
+                    selected
+                      ? "border-blue bg-blue/12 text-blue-soft shadow-[inset_0_0_0_1px_rgb(33_180_255/0.18)]"
+                      : "border-silver/18 bg-navy-deep/70 text-silver-dim hover:border-silver/35 hover:bg-navy-deep hover:text-silver"
+                  }`}
+                >
+                  <input
+                    id={
+                      option.value === "Квартира"
+                        ? "lead-objectType"
+                        : undefined
+                    }
+                    type="radio"
+                    name="objectType"
+                    value={option.value}
+                    checked={selected}
+                    onChange={(event) =>
+                      setValue("objectType", event.currentTarget.value)
+                    }
+                    className="sr-only"
+                    required
+                  />
+                  <span className="flex items-center gap-2">
+                    <span
+                      aria-hidden="true"
+                      className={`size-2 rounded-full transition-colors ${
+                        selected ? "bg-blue" : "bg-silver/25"
+                      }`}
+                    />
+                    {option.label}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+          {errors.objectType && (
+            <p id="lead-objectType-error" className="mt-2 text-sm text-red-200">
+              {errors.objectType}
+            </p>
+          )}
+        </fieldset>
+
         <div className="sm:col-span-2">
           <label htmlFor="lead-comment" className={labelClass}>
             Коротко про обʼєкт{" "}
@@ -341,7 +411,7 @@ export default function LeadForm() {
             />
           </svg>
         )}
-        {status === "loading" ? "Надсилаємо…" : "Обговорити проєкт"}
+        {status === "loading" ? "Надсилаємо…" : "Проконсультуватися"}
       </button>
 
       <p className="mt-4 text-xs leading-relaxed text-silver-dim/75">

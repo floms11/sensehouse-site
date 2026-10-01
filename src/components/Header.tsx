@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Logo from "./Logo";
 import { site } from "@/config/site";
 import { trackEvent } from "@/lib/analytics";
@@ -11,6 +12,7 @@ import { trackEvent } from "@/lib/analytics";
  * компактна напівпрозора панель із backdrop blur.
  */
 export default function Header() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
@@ -58,6 +60,12 @@ export default function Header() {
   }, [menuOpen]);
 
   const close = () => setMenuOpen(false);
+  const contactHref =
+    pathname === "/" ||
+    pathname === "/dlia-biznesu" ||
+    pathname.startsWith("/posluhy/")
+      ? "#contact"
+      : "/#contact";
 
   return (
     <header
@@ -102,11 +110,11 @@ export default function Header() {
             {site.phone.display}
           </a>
           <Link
-            href="/#contact"
+            href={contactHref}
             onClick={() => trackEvent("header_cta_click")}
             className="inline-flex min-h-11 items-center rounded-button bg-blue px-5 py-2.5 text-[0.92rem] font-semibold text-navy-deep transition-[background-color,box-shadow] duration-300 hover:bg-blue-soft hover:shadow-glow-blue"
           >
-            Обговорити проєкт
+            Проконсультуватися
           </Link>
         </div>
 
@@ -176,14 +184,14 @@ export default function Header() {
           </ul>
           <div className="mt-6 flex flex-col gap-3 border-t border-silver/10 pt-6">
             <Link
-              href="/#contact"
+              href={contactHref}
               onClick={() => {
                 trackEvent("header_cta_click", { placement: "mobile_menu" });
                 close();
               }}
               className="inline-flex min-h-12 items-center justify-center rounded-button bg-blue px-6 font-semibold text-navy-deep"
             >
-              Обговорити проєкт
+              Проконсультуватися
             </Link>
             <a
               href={`tel:${site.phone.e164}`}

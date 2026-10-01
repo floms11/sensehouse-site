@@ -39,7 +39,7 @@ export default function Hero() {
 
           <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
             <CTAButton href="#contact" size="lg" event="hero_cta_click">
-              Обговорити проєкт
+              Проконсультуватися
             </CTAButton>
             <CTAButton
               href={`tel:${site.phone.e164}`}

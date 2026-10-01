@@ -58,7 +58,7 @@ export default function MobileContactBar() {
           onClick={() => trackEvent("header_cta_click", { placement: "sticky_bar" })}
           className="inline-flex min-h-12 flex-1 items-center justify-center rounded-xl bg-blue px-4 text-[0.95rem] font-semibold text-navy-deep"
         >
-          Обговорити проєкт
+          Проконсультуватися
         </a>
         {site.social.telegram && (
           <a
